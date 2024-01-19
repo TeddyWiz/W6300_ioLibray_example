@@ -61,6 +61,8 @@ void Error_Handler(void);
 #define MOD4_GPIO_Port GPIOE
 #define MOD5_Pin GPIO_PIN_4
 #define MOD5_GPIO_Port GPIOE
+#define RSTn_Pin GPIO_PIN_4
+#define RSTn_GPIO_Port GPIOF
 #define MOD0_Pin GPIO_PIN_0
 #define MOD0_GPIO_Port GPIOC
 #define SPI_EN_Pin GPIO_PIN_4

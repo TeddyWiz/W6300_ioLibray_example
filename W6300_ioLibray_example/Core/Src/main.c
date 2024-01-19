@@ -21,6 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stdio.h"
+#include "string.h"
+#include "stdlib.h"
+#include "loopback.h"
+#include "wizchip_conf.h"
 
 /* USER CODE END Includes */
 
@@ -36,7 +41,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+OSPI_RegularCmdTypeDef com;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -46,18 +51,406 @@ OSPI_HandleTypeDef hospi1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+uint8_t W6300_mode = 0x02;//0; //W6100 >> 0xFF
+wiz_NetInfo gWIZNETINFO = {.mac = {0x00, 0x08, 0xdc, 0x12, 0x34, 0x45},
+                           .ip = {192, 168, 10, 10},
+                           .sn = {255, 255, 255, 0},
+                           .gw = {192, 168, 10, 1},
+                           .dns = {8, 8, 8, 8},
+                           .lla = {0xfe, 0x80, 0x00, 0x00,
+                                   0x00, 0x00, 0x00, 0x00,
+                                   0x02, 0x08, 0xdc, 0xff,
+                                   0xfe, 0xff, 0xff, 0xff},
+                           .gua = {0x20, 0x01, 0x02, 0xb8,
+                                   0x00, 0x10, 0x00, 0x01,
+                                   0x02, 0x08, 0xdc, 0xff,
+                                   0xfe, 0xff, 0xff, 0xff},
+                           .sn6 = {0xff, 0xff, 0xff, 0xff,
+                                   0xff, 0xff, 0xff, 0xff,
+                                   0x00, 0x00, 0x00, 0x00,
+                                   0x00, 0x00, 0x00, 0x00},
+                           .gw6 = {0xfe, 0x80, 0x00, 0x00,
+                                   0x00, 0x00, 0x00, 0x00,
+                                   0x02, 0x00, 0x87, 0xff,
+                                   0xfe, 0x08, 0x4c, 0x81}};
 
+uint8_t WIZ_Dest_IP[4] = {192, 168, 15, 2};                  //DST_IP Address
+
+
+uint8_t DestIP6_L[16] = {0xfe,0x80, 0x00,0x00,
+						  0x00,0x00, 0x00,0x00,
+                          0x31,0x71,0x98,0x05,
+                          0x70,0x24,0x4b,0xb1
+						};
+
+uint8_t DestIP6_G[16] = {0x20,0x01,0x02,0xb8,
+                          0x00,0x10,0x00,0x01,
+                          0x31,0x71,0x98,0x05,
+                          0x70,0x24,0x4b,0xb1
+                         };
+
+uint8_t Router_IP[16]= {0xff,0x02,0x00,0x00,
+                          0x00,0x00,0x00,0x00,
+                          0x00,0x00,0x00,0x00,
+                          0x00,0x00,0x00,0x02
+                         };
+uint8_t data_buf[2048];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
-static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
+uint8_t rxData;
+uint8_t rx_buffer[2048]= {0,};
+int rx_index = 0;
+uint8_t rx_flag =0;
 
+int _write(int fd, char *str, int len)
+{
+  for (int i = 0; i < len; i++)
+  {
+    HAL_UART_Transmit(&huart2, (uint8_t *)&str[i], 1, 0xFFFF);
+  }
+  return len;
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (is_testing == 1)
+  {
+    PRINT_DBG("testing...\r\n");
+  }
+  else // is_testing == 0
+  {
+    if (cmd_mode == 0)
+    {
+      HAL_UART_Transmit(&huart2, &rxData, 1, 1000);
+    }
+    if (rxData == '\n')
+    {
+      if (rx_buffer[rx_index - 1] == '\r')
+      {
+        rx_index--;
+        rx_flag = 1;
+        rx_buffer[rx_index] = 0;
+      }
+      else
+      {
+        rx_index = 0;
+        HAL_UART_Transmit(&huart2, "not support format\r\n", 20, 1000);
+      }
+    }
+    else if (rxData == 0x08) // back space
+    {
+      rx_index--;
+    }
+    else
+    {
+      rx_buffer[rx_index++] = rxData;
+    }
+  }
+  HAL_UART_Receive_IT(&huart2, &rxData, 1);
+}
+uint8_t qspi_read_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_t len)
+{
+    uint32_t OSPI_status = 0;
+    uint8_t ret = 0;
+	switch(W6300_mode)
+	{
+		case 0x00:	//single
+			com.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
+			com.DataMode = HAL_OSPI_DATA_1_LINE;//HAL_OSPI_DATA_4_LINES;
+
+			com.DummyCycles = 8;
+			break;
+		case 0x01:	//dual
+			com.AddressMode = HAL_OSPI_ADDRESS_2_LINES;
+			com.DataMode = HAL_OSPI_DATA_2_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_2_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 4;
+			break;
+		case 0x02:	//quad
+			com.AddressMode = HAL_OSPI_ADDRESS_4_LINES;
+			com.DataMode = HAL_OSPI_DATA_4_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 2;
+			break;
+        case 0x04:
+            printf("not Qspi mode bus mode \r\n");
+            return 6;
+            break;
+		default :
+			com.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
+			com.DataMode = HAL_OSPI_DATA_1_LINE;//HAL_OSPI_DATA_4_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;//HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 0;
+			break;
+	}
+	com.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;//HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+
+	com.Instruction = op_code;//0xAB;    // Command
+	com.AddressSize = HAL_OSPI_ADDRESS_16_BITS;
+	//com.AddressMode = HAL_OSPI_ADDRESS_1_LINE;//HAL_OSPI_ADDRESS_4_LINES;//QSPI_ADDRESS_1_LINE;
+	com.Address = AddrSel;//0x00000000;
+
+	com.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
+	com.AlternateBytes = HAL_OSPI_ALTERNATE_BYTES_NONE;
+	com.AlternateBytesSize = HAL_OSPI_ALTERNATE_BYTES_NONE;
+
+
+	//com.DataMode = HAL_OSPI_DATA_1_LINE;//HAL_OSPI_DATA_4_LINES;
+	//com.NbData = 1;
+
+	com.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
+	//com.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+	com.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
+
+	com.NbData = len;
+    #if 0
+	if (HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
+		  != HAL_OK)
+	{
+		printf("[%s > %s : %d]Cmd Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
+		return 1;
+	}
+	if (HAL_OSPI_Receive(&hospi1, pbuf, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
+		!= HAL_OK)
+	{
+		printf("[%s > %s : %d]Recv Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
+		return 2;
+	}
+        #endif
+#if 0
+    while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 0)
+    {
+        hospi1.Instance->FCR = OSPI_status;
+    }
+#endif
+	//if ((ret = HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)) != HAL_OK)
+  if ((ret = HAL_OSPI_Command(&hospi1, &com, 100)) != HAL_OK)
+  {
+		printf("[%s > %s : %d]Cmd Error ret:%02X st:%X\r\n",__FILE__, __FUNCTION__, __LINE__ , ret, (uint16_t)OSPI_status);
+		return 4;
+	}
+    //OSPI_status=HAL_OSPI_GetState(&hospi1);
+	qspi_flag_rx = 1;
+	if ((ret = HAL_OSPI_Receive_DMA(&hospi1, pbuf)) != HAL_OK)
+	{
+		printf("[%s > %s : %d]Recv Error ret:%02X st:%X\r\n",__FILE__, __FUNCTION__, __LINE__, ret, (uint16_t)OSPI_status);
+		return 5;
+	}
+#if 1
+	while(qspi_flag_rx)
+	{
+		//count and return
+	}
+#endif
+	//qspi_flag_rx = 1;
+#if 0
+    while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 4)
+    {
+        //hospi1.Instance->FCR = OSPI_status;
+    	hospi1.State = 0;
+    }
+#endif
+#if 0
+	while((OSPI_status=HAL_OSPI_GetState(&hospi1)) != HAL_OSPI_STATE_READY)
+	{
+		if((OSPI_status == HAL_OSPI_STATE_ABORT)||(OSPI_status == HAL_OSPI_STATE_ERROR))
+		{
+			while((OSPI_status = HAL_OSPI_Abort_IT(&hospi1)) != HAL_OK)
+			{
+				printf("HAL_OSPI_Abort_IT Error = 0x%02x\r\n", (uint16_t)OSPI_status);
+			}
+		}
+	}
+#endif
+#if 0
+	while(!((OSPI_status=hospi1.Instance->SR) & 0x13))
+	{
+		hospi1.Instance->FCR = OSPI_status;
+	}
+#endif
+	return 0;
+}
+uint8_t qspi_write_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_t len)
+{
+    uint32_t OSPI_status = 0;
+    uint8_t ret = 0;
+	switch(W6300_mode)
+	{
+		case 0x00:	//single
+			com.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
+			com.DataMode = HAL_OSPI_DATA_1_LINE;//HAL_OSPI_DATA_4_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;//HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 8;
+			break;
+		case 0x01:	//dual
+			com.AddressMode = HAL_OSPI_ADDRESS_2_LINES;
+			com.DataMode = HAL_OSPI_DATA_2_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_2_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 4;
+			break;
+		case 0x02:	//quad
+			com.AddressMode = HAL_OSPI_ADDRESS_4_LINES;
+			com.DataMode = HAL_OSPI_DATA_4_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 2;
+			break;
+        case 0x04:
+            printf("not Qspi mode bus mode \r\n");
+            return 6;
+            break;
+		default :
+			com.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
+			com.DataMode = HAL_OSPI_DATA_1_LINE;//HAL_OSPI_DATA_4_LINES;
+			//com.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;//HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+			com.DummyCycles = 0;
+			break;
+	}
+	com.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;//HAL_OSPI_INSTRUCTION_4_LINES;//QSPI_INSTRUCTION_1_LINE; // QSPI_INSTRUCTION_...
+	com.Instruction = op_code;//0xAB;    // Command
+	com.AddressSize = HAL_OSPI_ADDRESS_16_BITS;
+	//com.AddressMode = HAL_OSPI_ADDRESS_1_LINE;//HAL_OSPI_ADDRESS_4_LINES;//QSPI_ADDRESS_1_LINE;
+	com.Address = AddrSel;//0x00000000;
+
+	com.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
+	com.AlternateBytes = HAL_OSPI_ALTERNATE_BYTES_NONE;
+	com.AlternateBytesSize = HAL_OSPI_ALTERNATE_BYTES_NONE;
+
+
+	//com.DataMode = HAL_OSPI_DATA_1_LINE;//HAL_OSPI_DATA_4_LINES;
+	//com.NbData = 1;
+
+	com.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
+	//com.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+	com.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
+
+	com.NbData = len;
+    #if 0
+	//printf("send data[%d]:%s\r\n >",len, data);
+	if (HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
+		!= HAL_OK)
+	{
+		printf("[%s > %s : %d]CMD Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
+		return 1;
+	}
+	if (HAL_OSPI_Transmit(&hospi1, pbuf, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
+		!= HAL_OK)
+	{
+		printf("[%s > %s : %d]Send Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
+		return 2;
+	}
+        #endif
+#if 0
+    while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 0)
+	{
+	    hospi1.Instance->FCR = OSPI_status;
+	}
+#endif
+	//if ((ret = HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)) != HAL_OK)
+  if ((ret = HAL_OSPI_Command(&hospi1, &com, 100)) != HAL_OK)
+	{
+		printf("[%s > %s : %d]CMD Error ret:%02X st:%X\r\n",__FILE__, __FUNCTION__, __LINE__, ret, (uint16_t)OSPI_status);
+		return 4;
+	}
+	qspi_flag_tx = 1;
+	if ((ret = HAL_OSPI_Transmit_DMA(&hospi1, pbuf)) != HAL_OK)
+	{
+		printf("[%s > %s : %d]Send Error ret:%02X, st:%X\r\n",__FILE__, __FUNCTION__, __LINE__, ret, (uint16_t)OSPI_status);
+		return 5;
+	}
+#if 1
+	while(qspi_flag_tx)
+	{
+		//count and return
+	}
+#endif
+	//qspi_flag_tx = 1;
+#if 0
+	while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 4)
+    {
+        //hospi1.Instance->FCR = OSPI_status;
+		//hospi1.State = 0;
+    }
+#endif
+#if 0
+	while((OSPI_status=HAL_OSPI_GetState(&hospi1)) != HAL_OSPI_STATE_READY)
+	{
+		if((OSPI_status == HAL_OSPI_STATE_ABORT)||(OSPI_status == HAL_OSPI_STATE_ERROR))
+		{
+			while((OSPI_status = HAL_OSPI_Abort_IT(&hospi1)) != HAL_OK)
+			{
+				printf("HAL_OSPI_Abort_IT Error = 0x%02x\r\n", (uint16_t)OSPI_status);
+			}
+		}
+	}
+#endif
+#if 0
+	while(!((OSPI_status=hospi1.Instance->SR) & 0x13))
+		{
+			hospi1.Instance->FCR = OSPI_status;
+		}
+#endif
+	return 0;
+}
+void W6100Initialze(void)
+{
+	//W6100Reset();
+
+#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
+/* SPI method callback registration */
+	#if defined SPI_DMA
+	reg_wizchip_spi_cbfunc(W6100SpiReadByte, W6100SpiWriteByte, W6100SpiReadBurst, W6100SpiWriteBurst);
+	#else
+	reg_wizchip_spi_cbfunc(W6100SpiReadByte, W6100SpiWriteByte, 0, 0);
+	#endif
+	/* CS function register */
+	reg_wizchip_cs_cbfunc(W6100CsEnable, W6100CsDisable);
+#else
+/* Indirect bus method callback registration */
+	#if defined BUS_DMA
+	reg_wizchip_bus_cbfunc(W6100BusReadByte, W6100BusWriteByte, W6100BusReadBurst, W6100BusWriteBurst);
+	#else
+	reg_wizchip_bus_cbfunc(W6100BusReadByte, W6100BusWriteByte, 0, 0);
+	#endif
+#endif
+	uint8_t temp;
+	//unsigned char W6100_AdrSet[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
+   // unsigned char W6100_AdrSet[2][8] = {{4, 4, 4, 4, 4, 4, 4, 4}, {4, 4, 4, 4, 4, 4, 4, 4}};
+	unsigned char W6100_AdrSet[2][8] = {{0, 8, 0, 0, 0, 0, 0, 0}, {0, 8, 0, 0, 0, 0, 0, 0}};
+/*	do
+	{
+		if (ctlwizchip(CW_GET_PHYLINK, (void *)&temp) == -1)
+		{
+			printf("Unknown PHY link status.\r\n");
+		}
+	} while (temp == PHY_LINK_OFF);
+	printf("PHY OK.\r\n");
+*/
+	temp = IK_DEST_UNREACH;
+
+	if (ctlwizchip(CW_INIT_WIZCHIP, (void *)W6100_AdrSet) == -1)
+	{
+		printf("W6100 initialized fail.\r\n");
+	}
+
+	if (ctlwizchip(CW_SET_INTRMASK, &temp) == -1)
+	{
+		printf("W6100 interrupt\r\n");
+	}
+	//printf("interrupt mask: %02x\r\n",getIMR());
+}
+uint32_t get_time(void)
+{
+    return HAL_GetTick();
+}
+void print_network_information(void);
+void FPGA_Reset(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -74,9 +467,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-
-  /* MPU Configuration--------------------------------------------------------*/
-  MPU_Config();
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -102,7 +492,45 @@ int main(void)
   MX_OCTOSPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  printf("W6100 loop back test \r\n");
+  printf("Compile %s - %s \r\n", __DATE__, __TIME__);
+  HAL_UART_Receive_IT(&huart2, &rxData, 1);
+  HAL_RCCEx_GetPLL2ClockFreq(&PLL2_Clk_data);
+  printf("SET PLL2 P:%ld, Q:%ld, R:%ld \r\n", PLL2_Clk_data.PLL2_P_Frequency, PLL2_Clk_data.PLL2_Q_Frequency, PLL2_Clk_data.PLL2_R_Frequency);
+  printf("QSPI CLK %d Mhz \r\n", (uint16_t)(PLL2_Clk_data.PLL2_R_Frequency / hospi1.Init.ClockPrescaler / 1000000));
+#if 1
+#if (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_)
+  HAL_GPIO_WritePin(MOD0_GPIO_Port, MOD0_Pin, GPIO_PIN_SET);
+#else
+  HAL_GPIO_WritePin(MOD0_GPIO_Port, MOD0_Pin, GPIO_PIN_RESET);
+#endif
+  HAL_GPIO_WritePin(MOD1_GPIO_Port, MOD1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(MOD2_GPIO_Port, MOD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(MOD3_GPIO_Port, MOD3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(MOD4_GPIO_Port, MOD4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(MOD5_GPIO_Port, MOD5_Pin, GPIO_PIN_RESET);
+#endif
 
+  HAL_GPIO_WritePin(RSTn_GPIO_Port, RSTn_Pin, GPIO_PIN_RESET);
+  HAL_Delay(500);
+  HAL_GPIO_WritePin(RSTn_GPIO_Port, RSTn_Pin, GPIO_PIN_SET);
+  HAL_Delay(500);
+#if 1
+  HAL_GPIO_WritePin(SPI_EN_GPIO_Port, SPI_EN_Pin, GPIO_PIN_SET);
+  HAL_Delay(500);
+  HAL_GPIO_WritePin(SPI_EN_GPIO_Port, SPI_EN_Pin, GPIO_PIN_RESET);
+  HAL_Delay(500);
+  HAL_Delay(500);
+#endif
+  W6100Initialze();
+  ctlwizchip(CW_SYS_UNLOCK, &syslock);
+  ctlnetwork(CN_SET_NETINFO, &gWIZNETINFO);
+  printf("VERSION(%04x) = %04x \r\n", _VER_, getVER());
+  for (i = 0; i < 8; i++)
+  {
+    printf("%d : max size = %d k \r\n", i, getSn_TxMAX(i));
+  }
+  print_network_information();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -324,6 +752,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOE, MOD4_Pin|MOD5_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(RSTn_GPIO_Port, RSTn_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, MOD0_Pin|SPI_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -338,6 +769,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RSTn_Pin */
+  GPIO_InitStruct.Pin = RSTn_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(RSTn_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : MOD0_Pin SPI_EN_Pin */
   GPIO_InitStruct.Pin = MOD0_Pin|SPI_EN_Pin;
@@ -367,35 +805,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* MPU Configuration */
-
-void MPU_Config(void)
-{
-  MPU_Region_InitTypeDef MPU_InitStruct = {0};
-
-  /* Disables the MPU */
-  HAL_MPU_Disable();
-
-  /** Initializes and configures the Region and the memory to be protected
-  */
-  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.BaseAddress = 0x0;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
-  MPU_InitStruct.SubRegionDisable = 0x87;
-  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-  MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-  MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
-  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-
-  HAL_MPU_ConfigRegion(&MPU_InitStruct);
-  /* Enables the MPU */
-  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.
