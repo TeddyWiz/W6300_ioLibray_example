@@ -1,6 +1,6 @@
 //* ****************************************************************************
-//! \file w6100.h
-//! \brief W6100 HAL Header File.
+//! \file W6300.h
+//! \brief W6300 HAL Header File.
 //! \version 1.0.0
 //! \date 2019/01/01
 //! \par  Revision history
@@ -31,8 +31,8 @@
 //*****************************************************************************
 
 
-#ifndef      _W6100_H_
-#define      _W6100_H_
+#ifndef      _W6300_H_
+#define      _W6300_H_
 
 #include <stdint.h>
 #include "wizchip_conf.h"
@@ -43,11 +43,11 @@ extern "C" {
 #endif
 
 /// @cond DOXY_APPLY_CODE
-#if      (_WIZCHIP_ == W6100)
+#if      (_WIZCHIP_ == W6300)
 /// @endcond
 
-#define _W6100_SPI_READ_                  (0x00 << 2)        ///< SPI interface Read operation in Control Phase
-#define _W6100_SPI_WRITE_                 (0x01 << 2)        ///< SPI interface Write operation in Control Phase
+#define _W6300_SPI_READ_                  (0x00 << 2)        ///< SPI interface Read operation in Control Phase
+#define _W6300_SPI_WRITE_                 (0x01 << 2)        ///< SPI interface Write operation in Control Phase
 
 #define WIZCHIP_CREG_BLOCK                (0x00   <<3)       ///< Common register block
 #define WIZCHIP_SREG_BLOCK(N)             ((1+4*N)<<3)       ///< SOCKETn register block
@@ -61,57 +61,57 @@ extern "C" {
    #define IDM_AR1                        ((_WIZCHIP_IO_BASE_ + 0x0001))      ///< Indirect Low Address Register
    #define IDM_BSR                        ((_WIZCHIP_IO_BASE_ + 0x0002))      ///< Block Select Register
    #define IDM_DR                         ((_WIZCHIP_IO_BASE_ + 0x0003))      ///< Indirect Data Register
-   #define _W6100_IO_BASE_       _WIZCHIP_IO_BASE_
+   #define _W6300_IO_BASE_       _WIZCHIP_IO_BASE_
 #elif (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
-   #define _W6100_IO_BASE_       0x00000000
+   #define _W6300_IO_BASE_       0x00000000
 #endif
 
 
 //-----------       defgroup --------------------------------
 
 /**
- * @defgroup W6100 W6100
+ * @defgroup W6300 W6300
  * @brief @ref _WIZCHIP_ register defines and I/O functions
  * @details
- *   - @ref WIZCHIP_register_W6100 : @ref Common_register_group_W6100, @ref Socket_register_group_W6100
- *   - @ref WIZCHIP_IO_Functions_W6100 : @ref Basic_IO_function_W6100, @ref Common_register_access_function_W6100, @ref Socket_register_access_function_W6100
+ *   - @ref WIZCHIP_register_W6300 : @ref Common_register_group_W6300, @ref Socket_register_group_W6300
+ *   - @ref WIZCHIP_IO_Functions_W6300 : @ref Basic_IO_function_W6300, @ref Common_register_access_function_W6300, @ref Socket_register_access_function_W6300
  */
 
  /**
- * @defgroup WIZCHIP_register_W6100 WIZCHIP register
- * @ingroup W6100
- * @brief @ref WIZCHIP_register_W6100 defines register group of @b W6100.
+ * @defgroup WIZCHIP_register_W6300 WIZCHIP register
+ * @ingroup W6300
+ * @brief @ref WIZCHIP_register_W6300 defines register group of @b W6300.
  * @details
- *   - @ref Common_register_group_W6100 : Common register group W6100
- *   - @ref Socket_register_group_W6100 : SOCKET n register group W6100
+ *   - @ref Common_register_group_W6300 : Common register group W6300
+ *   - @ref Socket_register_group_W6300 : SOCKET n register group W6300
  */
 
 /**
- * @defgroup Basic_IO_function_W6100 Basic I/O function
- * @ingroup WIZCHIP_IO_Functions_W6100
+ * @defgroup Basic_IO_function_W6300 Basic I/O function
+ * @ingroup WIZCHIP_IO_Functions_W6300
  * @brief These are basic input/output functions to read values from register or write values to register.
  */
 
 /**
- * @defgroup Common_register_access_function_W6100 Common register access functions
- * @ingroup WIZCHIP_IO_Functions_W6100
- * @brief These are functions to access @ref Common_register_group_W6100.
+ * @defgroup Common_register_access_function_W6300 Common register access functions
+ * @ingroup WIZCHIP_IO_Functions_W6300
+ * @brief These are functions to access @ref Common_register_group_W6300.
  */
 
 /**
- * @defgroup Socket_register_access_function_W6100 Socket register access functions
- * @ingroup WIZCHIP_IO_Functions_W6100
- * @brief These are functions to access @ref Socket_register_group_W6100.
+ * @defgroup Socket_register_access_function_W6300 Socket register access functions
+ * @ingroup WIZCHIP_IO_Functions_W6300
+ * @brief These are functions to access @ref Socket_register_group_W6300.
  */
 
 /**
- * @defgroup WIZCHIP_IO_Functions_W6100 WIZCHIP I/O functions
- * @ingroup W6100
- * @brief @ref WIZCHIP_IO_Functions_W6100 supports the basic I/O functions for @ref WIZCHIP_register_W6100.
+ * @defgroup WIZCHIP_IO_Functions_W6300 WIZCHIP I/O functions
+ * @ingroup W6300
+ * @brief @ref WIZCHIP_IO_Functions_W6300 supports the basic I/O functions for @ref WIZCHIP_register_W6300.
  * @details
- *   - @ref WIZCHIP_IO_Functions_W6100 \n
+ *   - @ref WIZCHIP_IO_Functions_W6300 \n
  *     WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
- *   - @ref Common_register_access_function_W6100 \n
+ *   - @ref Common_register_access_function_W6300 \n
  *     - @ref _WIZCHIP_ Mode \n
  *       getCIDR(), getVER() \n
  *       getSYSR()  \n
@@ -148,7 +148,7 @@ extern "C" {
  *       getPHYRAR(), setPHYRAR(), setPHYDIR(), getPHYDOR(), getPHYACR(), setPHYACR(), getPHYDIVR(), setPHYDIVR()
  *     - etc \n
  *       getTCNTR(), setTCNTRCLR()
- *   - @ref Socket_register_access_function_W6100 \n
+ *   - @ref Socket_register_access_function_W6300 \n
  *     - SOCKET control \n
  *       getSn_MR(), setSn_MR(), getSn_MR2(), setSn_MR2(), getSn_PSR(), setSn_PSR(), getSn_CR(), setSn_CR() \n
  *       getSn_IR(), setSn_IRCLR(), getSn_IMR(), setSn_IMR()  \n
@@ -169,8 +169,8 @@ extern "C" {
  */
 
 /**
- * @defgroup Common_register_group_W6100 Common register
- * @ingroup WIZCHIP_register_W6100
+ * @defgroup Common_register_group_W6300 Common register
+ * @ingroup WIZCHIP_register_W6300
  * @brief Common register group \n
  * @details It set the general configuration such as interrupt, network information, ICMP, and etc.
  * @sa
@@ -191,8 +191,8 @@ extern "C" {
  
 
 /**
- * @defgroup Socket_register_group_W6100 Socket register
- * @ingroup WIZCHIP_register_W6100
+ * @defgroup Socket_register_group_W6300 Socket register
+ * @ingroup WIZCHIP_register_W6300
  * @brief Socket register group\n
  * @details
  * SOCKETn registers configure and control SOCKETn which is necessary to data communication.
@@ -208,10 +208,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------------
 
-//----------------------------- W6100 Common Registers IOMAP -----------------------------
+//----------------------------- W6300 Common Registers IOMAP -----------------------------
 
 /**
- * @addtogroup Common_register_group_W6100
+ * @addtogroup Common_register_group_W6300
  * @{
  */
 
@@ -219,13 +219,13 @@ extern "C" {
  * @brief Chip Identification Register address [RO] [0x6100]
  * @sa getCIDR()
  */
-#define _CIDR_               (_W6100_IO_BASE_ + (0x0000 << 8) + WIZCHIP_CREG_BLOCK)
+#define _CIDR_               (_W6300_IO_BASE_ + (0x0000 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Chip Version Register address [RO] [0x4661]
  * @sa getVER()
  */
-#define _VER_                (_W6100_IO_BASE_ + (0x0002 << 8) + WIZCHIP_CREG_BLOCK)
+#define _VER_                (_W6300_IO_BASE_ + (0x0002 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief System Status Register address [RO] [0xEU]
@@ -244,7 +244,7 @@ extern "C" {
  * @sa getSYSR(), setCHPLCKR(), getCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK() \n
  *        setPHYLCKR(), getPHYLCKR(), PHYLOCK(), PHYUNLOCK()
  */
-#define _SYSR_               (_W6100_IO_BASE_ + (0x2000 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SYSR_               (_W6300_IO_BASE_ + (0x2000 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief System Config Register 0 address [WO][0x80] 
@@ -259,7 +259,7 @@ extern "C" {
  * @sa _CHPLCKR_, _SYSR_, SYSR_CHPL
  * @sa setSYCR0(), setCHPLCKR(), getCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SYCR0_              (_W6100_IO_BASE_ + (0x2004 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SYCR0_              (_W6300_IO_BASE_ + (0x2004 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief System Config Register 1 address [R=W][0x80] 
@@ -283,14 +283,14 @@ extern "C" {
  * @sa _TCNTRCLR_
  * @sa getTCNTR(), setTCNTRCLR() 
  */
-#define _TCNTR_              (_W6100_IO_BASE_ + (0x2016 << 8) + WIZCHIP_CREG_BLOCK)
+#define _TCNTR_              (_W6300_IO_BASE_ + (0x2016 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Ticker Counter Clear Register address [RO][0x00]
  * @details @ref _TCNTRCLR_ clear @ref _TCNTR_.
  * @sa setTCNTRCLR(), getTCNTR()
  */
-#define _TCNTRCLR_           (_W6100_IO_BASE_ + (0x2020 << 8) + WIZCHIP_CREG_BLOCK)
+#define _TCNTRCLR_           (_W6300_IO_BASE_ + (0x2020 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Interrupt Register address [RO][0x00]
@@ -310,7 +310,7 @@ extern "C" {
  * @sa _IMR_, _IRCLR_, SYCR1_IEN, _CHIPLCKR_, _SYSR_, SYSR_CHPL
  * @sa getIR(), setIRCLR(), getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR() 
  */
-#define _IR_                 (_W6100_IO_BASE_ + (0x2100 << 8) + WIZCHIP_CREG_BLOCK)
+#define _IR_                 (_W6300_IO_BASE_ + (0x2100 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET Interrupt Register address [RO][0x00]
@@ -320,7 +320,7 @@ extern "C" {
  * @sa getSIR(), getSn_IR(), setSn_IRCLR(), getSIMR(), setSIMR(), getSn_IMR(), setSn_IMR(), getSYCR1(), setSYCR1(), \n
  *     getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SIR_                (_W6100_IO_BASE_ + (0x2101 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SIR_                (_W6300_IO_BASE_ + (0x2101 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Interrupt Register address [RO][0x00]
@@ -342,7 +342,7 @@ extern "C" {
  * @sa getSLIR(), setSLIRCLR(),  getSLIR(), getSLIMR(), setSLIMR(), \n
  *     getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SLIR_               (_W6100_IO_BASE_ + (0x2102 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLIR_               (_W6300_IO_BASE_ + (0x2102 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Interrupt Mask Register address [R=W][0x00]
@@ -352,7 +352,7 @@ extern "C" {
  * @sa getIMR(), setIMR(),  getIR(), setIRCLR(), \n
  *     getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _IMR_                (_W6100_IO_BASE_ + (0x2104 << 8) + WIZCHIP_CREG_BLOCK)
+#define _IMR_                (_W6300_IO_BASE_ + (0x2104 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief @ref _IR_  Clear Register address [WO][0x00]
@@ -360,7 +360,7 @@ extern "C" {
  * @sa _IR_, _IMR_, SYCR1_IEN, _CHPLCKR_, _SYSR_, SYSR_CHPL
  * @sa setIRCLR(), getIR(), getIMR(), getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _IRCLR_              (_W6100_IO_BASE_ + (0x2108 << 8) + WIZCHIP_CREG_BLOCK)
+#define _IRCLR_              (_W6300_IO_BASE_ + (0x2108 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET Interrupt Mask Register address [R=W]][0x00]
@@ -371,7 +371,7 @@ extern "C" {
  * @sa getSIMR(), setSIMR(), getSIR(), setSn_IRCLR(), getSn_IMR(), setSn_IMR(), \n
  *     getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SIMR_               (_W6100_IO_BASE_ + (0x2114 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SIMR_               (_W6300_IO_BASE_ + (0x2114 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Interrupt Mask Register address [R=W][0x00]
@@ -381,7 +381,7 @@ extern "C" {
  * @sa getSLIMR(), setSLIMR(), getSLIR(), setSLIRCLR(), \n
  *     getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SLIMR_              (_W6100_IO_BASE_ + (0x2124 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLIMR_              (_W6300_IO_BASE_ + (0x2124 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Interrupt Clear Register address [WO][0x00]
@@ -390,7 +390,7 @@ extern "C" {
  * @sa getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR(), \n
  *     getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SLIRCLR_            (_W6100_IO_BASE_ + (0x2128 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLIRCLR_            (_W6300_IO_BASE_ + (0x2128 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Prefer Source IPv6 Address Register address [R=W][0x00]
@@ -401,7 +401,7 @@ extern "C" {
  * @sa _SLCR_, _Sn_PSR_
  * @sa getSLPSR(), setSLPSR(), getSLCR(), setSLCR(), getSn_PSR(), setSn_PSR()
  */
-#define _SLPSR_              (_W6100_IO_BASE_ + (0x212C << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLPSR_              (_W6300_IO_BASE_ + (0x212C << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Command Register address [RW,AC][0x00]
@@ -422,7 +422,7 @@ extern "C" {
  * @sa getSLCR(), setSLCR(), getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR(), getSLDIPR(),setSLDIPR(), getSLDIP4R(),setSLDIP4R(), 
  *     getSLDIP6R(), setSLDIP6R(), getSLDHAR(), getSYCR1(), setSYCR1(), getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _SLCR_               (_W6100_IO_BASE_ + (0x2130 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLCR_               (_W6300_IO_BASE_ + (0x2130 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Status Register address [RO][0x00]
@@ -436,7 +436,7 @@ extern "C" {
  * @sa _PHYCR0_, _PHYLCKR_, _SYSR_, SYSR_PHYL
  * @sa getPHYSR(), setPHYCR0(), setPHYLCKR(), getPHYLCKR(), PHYLOCK(), PHYUNLOCK(), getSYSR() 
  */
-#define _PHYSR_              (_W6100_IO_BASE_ + (0x3000 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYSR_              (_W6300_IO_BASE_ + (0x3000 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Internal Register Address Register address(R/W)
@@ -446,7 +446,7 @@ extern "C" {
  * @sa _PHYACR_, _PHYDOR_, _PHYDIR_, _PHYDIVR_
  * @sa getPHYACR(), setPHYACR(), getPHYDOR(), setPHYDIR(), getPHYDIVR(), setPHYDIVR()
  */
-#define _PHYRAR_             (_W6100_IO_BASE_ + (0x3008 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYRAR_             (_W6300_IO_BASE_ + (0x3008 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Data Input Register address [R=W][0x00]
@@ -454,7 +454,7 @@ extern "C" {
  * @sa _PHYRAR_, _PHYACR_, _PHYDOR_, _PHYDIVR_
  * @sa setPHYDIR(), getPHYRAR(), setPHYRAR(), getPHYACR(), setPHYACR(), getPHYDOR(), setPHYDIR(), getPHYDIVR(), setPHYDIVR()
  */
-#define _PHYDIR_             (_W6100_IO_BASE_ + (0x300C << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYDIR_             (_W6300_IO_BASE_ + (0x300C << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Data Output Register address [WO][0x00]
@@ -462,7 +462,7 @@ extern "C" {
  * @sa _PHYRAR_, _PHYACR_, _PHYDIR_, _PHYDIVR_
  * @sa getPHYDOR(), getPHYRAR(), setPHYRAR(), getPHYACR(), setPHYACR(), setPHYDIR(), getPHYDIVR(), setPHYDIVR()
  */
-#define _PHYDOR_             (_W6100_IO_BASE_ + (0x3010 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYDOR_             (_W6300_IO_BASE_ + (0x3010 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Access Register address [RW,AC][0x00]
@@ -472,7 +472,7 @@ extern "C" {
  * @sa _PHYRAR_, _PHYDOR_, _PHYDIR_, _PHYDIVR_
  * @sa getPHYACR(), setPHYACR(), getPHYDOR(), getPHYRAR(), setPHYRAR(), setPHYDIR(), getPHYDIVR(), setPHYDIVR()
  */
-#define _PHYACR_             (_W6100_IO_BASE_ + (0x3014 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYACR_             (_W6300_IO_BASE_ + (0x3014 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY's MDC Clock Division Register address [R=W][0x01]
@@ -483,7 +483,7 @@ extern "C" {
  * @sa _PHYRAR_, _PHYACR_, _PHYDOR_, _PHYDIR_, _PHYDIVR_
  * @sa getPHYDIVR(), setPHYDIVR(), getPHYRAR(), setPHYRAR(), getPHYACR(), setPHYACR(), getPHYDOR(), setPHYDIR()
  */
-#define _PHYDIVR_            (_W6100_IO_BASE_ + (0x3018 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYDIVR_            (_W6300_IO_BASE_ + (0x3018 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Control Register address [WO][0x00]
@@ -499,7 +499,7 @@ extern "C" {
  * @sa _SYSR_, _PHYCR1_
  * @sa setPHYCR0(), getSYSR(), getPHYCR1(), setPHYCR1() 
  */
-#define _PHYCR0_             (_W6100_IO_BASE_ + (0x301C << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYCR0_             (_W6300_IO_BASE_ + (0x301C << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY Control Register address [R=W][0x40]
@@ -534,7 +534,7 @@ extern "C" {
  * @sa _NET6MR_
  * @sa getNET4MR(), setNET4MR(), getNET6MR(), setNET6MR()
  */
-#define _NET4MR_             (_W6100_IO_BASE_ + (0x4000 << 8) + WIZCHIP_CREG_BLOCK)
+#define _NET4MR_             (_W6300_IO_BASE_ + (0x4000 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Network IPv6 Mode Register address [R=W][0x00]
@@ -552,7 +552,7 @@ extern "C" {
  * @sa _NET4MR_
  * @sa getNET6MR(), setNET6MR(), getNET4MR(), setNET4MR() 
  */
-#define _NET6MR_             (_W6100_IO_BASE_ + (0x4004 << 8) + WIZCHIP_CREG_BLOCK)
+#define _NET6MR_             (_W6300_IO_BASE_ + (0x4004 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Network Mode Register address [R=W][0x00]
@@ -575,7 +575,7 @@ extern "C" {
  * @sa getNETMR(), setNETMR()
  *
  */
-#define _NETMR_              (_W6100_IO_BASE_ + (0x4008 << 8) + WIZCHIP_CREG_BLOCK)
+#define _NETMR_              (_W6300_IO_BASE_ + (0x4008 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Network Mode Register 2 address [R=W][0x00]
@@ -589,7 +589,7 @@ extern "C" {
  *   - @ref NETMR2_PPPoE
  * @sa getNETMR2(), setNETMR2()
  */
-#define _NETMR2_             (_W6100_IO_BASE_ + (0x4009 << 8) + WIZCHIP_CREG_BLOCK)
+#define _NETMR2_             (_W6300_IO_BASE_ + (0x4009 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PPP LCP request Timer Register address [R=W][0x28]
@@ -598,7 +598,7 @@ extern "C" {
  * @sa _PMNR_, _PHAR_, _PSIDR_, _PMRUR_, NETMR2_PPPoE
  * @sa getPTMR(), setPTMR(), getPMNR(), setPMNR(), getPHAR(), setPHAR(), getPSIDR(), setPSIDR(), getPMRUR(), setPMRUR(), getNETMR2(), setNETMR2()
  */
-#define _PTMR_               (_W6100_IO_BASE_ + (0x4100 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PTMR_               (_W6300_IO_BASE_ + (0x4100 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PPP LCP Magic Number Register address [R=W][0x00]
@@ -606,7 +606,7 @@ extern "C" {
  * @sa _PTMR_, _PHAR_, _PSIDR_, _PMRUR_, NETMR2_PPPoE
  * @sa getPMNR(), setPMNR(), getPTMR(), setPTMR(), getPHAR(), setPHAR(), getPSIDR(), setPSIDR(), getPMRUR(), setPMRUR(), getNETMR2(), setNETMR2()
  */
-#define _PMNR_               (_W6100_IO_BASE_ + (0x4104 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PMNR_               (_W6300_IO_BASE_ + (0x4104 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PPPoE Hardware Address Register address [R=W][0x00]
@@ -614,7 +614,7 @@ extern "C" {
  * @sa _PTMR_, _PMNR_, _PSIDR_, _PMRUR_, NETMR2_PPPoE
  * @sa getPHAR(), setPHAR(), getPTMR(), setPTMR(), getPMNR(), setPMNR(), getPSIDR(), setPSIDR(), getPMRUR(), setPMRUR(), getNETMR2(), setNETMR2()
  */
-#define _PHAR_               (_W6100_IO_BASE_ + (0x4108 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHAR_               (_W6300_IO_BASE_ + (0x4108 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PPP Session ID Register address [R=W][0X0000]
@@ -622,7 +622,7 @@ extern "C" {
  * @sa _PTMR_, _PMNR_, _PHAR_, _PMRUR_, NETMR2_PPPoE
  * @sa getPSIDR(), setPSIDR(), getPTMR(), setPTMR(), getPMNR(), setPMNR(), getPHAR(), setPHAR(), getPMRUR(), setPMRUR(), getNETMR2(), setNETMR2()
  */
-#define _PSIDR_              (_W6100_IO_BASE_ + (0x4110 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PSIDR_              (_W6300_IO_BASE_ + (0x4110 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PPP Maximum Receive Unit Register address [R=W][0xFFFF]
@@ -630,7 +630,7 @@ extern "C" {
  * @sa _PTMR_, _PMNR_, _PHAR_, _PSIDR_, NETMR2_PPPoE
  * @sa  getPMRUR(), setPMRUR(), getPTMR(), setPTMR(), getPMNR(), setPMNR(), getPHAR(), setPHAR(), getPSIDR(), setPSIDR(), getNETMR2(), setNETMR2()
  */
-#define _PMRUR_              (_W6100_IO_BASE_ + (0x4114 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PMRUR_              (_W6300_IO_BASE_ + (0x4114 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Source Hardware Address Register address [R=W][00:00:00:00:00:00]
@@ -639,7 +639,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_
  * @sa getSHAR(), setSHAR(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK()
  */
-#define _SHAR_               (_W6100_IO_BASE_ + (0x4120 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SHAR_               (_W6300_IO_BASE_ + (0x4120 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief IPv4 Gateway Address Register address [R=W][0.0.0.0]
@@ -648,7 +648,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_, _GA6R_
  * @sa getGAR(), setGAR(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK(), getGA6R(), setGA6R()
  */
-#define _GAR_                (_W6100_IO_BASE_ + (0x4130 << 8) + WIZCHIP_CREG_BLOCK)
+#define _GAR_                (_W6300_IO_BASE_ + (0x4130 << 8) + WIZCHIP_CREG_BLOCK)
 #define _GA4R_               (_GAR_)      ///< Refer to @ref _GAR_
 /**
  * @brief IPv4 Subnet Mask Register address [R=W][0.0.0.0]
@@ -657,7 +657,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_, _SUB6R_
  * @sa getSUBR(), setSUBR(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK(), getSUB6R(), setSUB6R()
  */
-#define _SUBR_               (_W6100_IO_BASE_ + (0x4134 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SUBR_               (_W6300_IO_BASE_ + (0x4134 << 8) + WIZCHIP_CREG_BLOCK)
 #define _SUB4R_              (_SUBR_)      ///< Refer to @ref _SUBR_
 
 /**
@@ -667,7 +667,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_, _LLAR_, _GUAR_
  * @sa getSIPR(), setSIPR(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK(), getLLAR(), setLLAR(), getGUAR(),setGUAR()
  */
-#define _SIPR_               (_W6100_IO_BASE_ + (0x4138 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SIPR_               (_W6300_IO_BASE_ + (0x4138 << 8) + WIZCHIP_CREG_BLOCK)
 #define _SIP4R_              (_SIPR_)   ///< Refer to @ref _SIPR_.
 
 /**
@@ -677,7 +677,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_, _GUAR_, _SIPR_
  * @sa getLLAR(), setLLAR(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK(), getGUAR(),setGUAR(), getSIPR(), setSIPR()
  */
-#define _LLAR_               (_W6100_IO_BASE_ + (0x4140 << 8) + WIZCHIP_CREG_BLOCK)
+#define _LLAR_               (_W6300_IO_BASE_ + (0x4140 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief IPv6 GUA(Global Unicast Address) Register address [R=W][::]
@@ -686,7 +686,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_, _LLAR_, _SIPR_
  * @sa getGUAR(), setGUAR(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK(), getLLAR(),setLLAR(), getSIPR(), setSIPR()
  */
-#define _GUAR_               (_W6100_IO_BASE_ + (0x4150 << 8) + WIZCHIP_CREG_BLOCK)
+#define _GUAR_               (_W6300_IO_BASE_ + (0x4150 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief IPv6 Subnet Mask Register address [R=W][]
@@ -695,7 +695,7 @@ extern "C" {
  * @sa SYSR_NETL, _NETLCKR_, _SUBR_
  * @sa getSUB6R(), setSUB6R(), getSYSR(), setNETLCKR(), getNETLCKR(), NETLOCK(), NETUNLOCK(), getSUBR(), setSUBR()
  */
-#define _SUB6R_              (_W6100_IO_BASE_ + (0x4160 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SUB6R_              (_W6300_IO_BASE_ + (0x4160 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief IPv6 Gateway Address Register address [R/W][::]
@@ -703,7 +703,7 @@ extern "C" {
  * @sa _GAR_
  * @sa getGA6R(), setGA6R(), getGAR(), setGAR()
  */
-#define _GA6R_               (_W6100_IO_BASE_ + (0x4170 << 8) + WIZCHIP_CREG_BLOCK)
+#define _GA6R_               (_W6300_IO_BASE_ + (0x4170 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Peer IPv6 Register address [R=W][::]
@@ -712,7 +712,7 @@ extern "C" {
  * @sa getSLDIP6R(), setSLDIP6R(), getSLCR(), setSLCR(), getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR(), getSLDHAR(),
  *     getSLDIPR(), setSLDIPR(), getSLDIP4R(), setSLDIP4R()
  */
-#define _SLDIP6R_            (_W6100_IO_BASE_ + (0x4180 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLDIP6R_            (_W6300_IO_BASE_ + (0x4180 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Peer IPv6 Register address [R=W][0.0.0.0]
@@ -721,7 +721,7 @@ extern "C" {
  * @sa getSLDIPR(), setSLDIPR(), getSLDIP4R(), setSLDIP4R(), getSLCR(), setSLCR(), getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR(), getSLDHAR(),
  *     getSLDIP6R(), setSLDIP6R()
  */
-#define _SLDIPR_             (_W6100_IO_BASE_ + (0x418C << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLDIPR_             (_W6300_IO_BASE_ + (0x418C << 8) + WIZCHIP_CREG_BLOCK)
 #define _SLDIP4R_            (_SLDIPR_)            ///< Refer to @ref _SLDIPR_.
 
 
@@ -732,7 +732,7 @@ extern "C" {
  * @sa getSLDHAR(), getSLDIP4R(), setSLDIP4R(), getSLDIP6R(), setSLDIP6R(), getSLCR(), setSLCR(), \n
  *     getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR() 
  */
-#define _SLDHAR_             (_W6100_IO_BASE_ + (0x4190 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLDHAR_             (_W6300_IO_BASE_ + (0x4190 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Ping ID Register address [R=W][0x00]
@@ -741,7 +741,7 @@ extern "C" {
  * @sa getPINGIDR(), setPINGIDR(), getSLCR(), setSLCR(), getPINGSEQR(), setPINGSEQR(), getSLDIPR(), setSLDIPR(), 
  *     getSLDIP4R(), setSLDIP4R(), getSLDIP6R(), setSLDIP6R(), getSLDHAR(), getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR()
  */
-#define _PINGIDR_            (_W6100_IO_BASE_ + (0x4198 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PINGIDR_            (_W6300_IO_BASE_ + (0x4198 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less ping Sequence number Register address [R=W][0x0000]
@@ -750,7 +750,7 @@ extern "C" {
  * @sa getPINGSEQR(), setPINGSEQR(), getSLCR(), setSLCR(), getPINGIDR(), setPINGIDR(), getSLDIPR(), setSLDIPR(), getSLDIP4R(), setSLDIP4R(),
  *     getSLDIP6R(), setSLDIP6R(), getSLDHAR(), getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR()
  */
-#define _PINGSEQR_           (_W6100_IO_BASE_ + (0x419C << 8) + WIZCHIP_CREG_BLOCK)
+#define _PINGSEQR_           (_W6300_IO_BASE_ + (0x419C << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief IPv4 Unreachable Address Register address [RO][0.0.0.0]
@@ -758,7 +758,7 @@ extern "C" {
  * @sa _UPORTR_, _UIP6R_, _UPORT6R_
  * @sa getUIPR(), setUIPR(), getUPORTR(), setUPORTR(), getUIPR6(), setUIPR6(), getUPORT6R(), setUPORT6R()
  */
-#define _UIPR_               (_W6100_IO_BASE_ + (0x41A0 << 8) + WIZCHIP_CREG_BLOCK)
+#define _UIPR_               (_W6300_IO_BASE_ + (0x41A0 << 8) + WIZCHIP_CREG_BLOCK)
 #define _UIP4R_              (_UIPR_)   ///< Refer to @ref _UPORTR_
 
 /**
@@ -767,7 +767,7 @@ extern "C" {
  * @sa _UIPR_, _UIP6R_, _UPORT6R_
  * @sa getUPORTR(), setUPORTR(), getUIPR(), setUIPR(), getUIPR6(), setUIPR6(), getUPORT6R(), setUPORT6R()
  */
-#define _UPORTR_             (_W6100_IO_BASE_ + (0x41A4 << 8) + WIZCHIP_CREG_BLOCK)
+#define _UPORTR_             (_W6300_IO_BASE_ + (0x41A4 << 8) + WIZCHIP_CREG_BLOCK)
 #define _UPORT4R_            (_UPORTR_)   ///< Refer to @ref _UPORTR_
 /**
  * @brief IPv6 Unreachable IP Address Register address [RO][::]
@@ -775,7 +775,7 @@ extern "C" {
  * @sa _UIPR_, _UPORTR_, _UIP6R_, _UPORT6R_
  * @sa getUIPR6(), setUIPR6(), getUIPR(), setUIPR(), getUPORTR(), setUPORTR(), getUPORT6R(), setUPORT6R()
  */
-#define _UIP6R_              (_W6100_IO_BASE_ + (0x41B0 << 8) + WIZCHIP_CREG_BLOCK)
+#define _UIP6R_              (_W6300_IO_BASE_ + (0x41B0 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief IPv6 Unreachable Port number Register address [RO][0x0000]
@@ -783,7 +783,7 @@ extern "C" {
  * @sa _UIPR_, _UPORTR_, _UIP6R_, _UPORT6R_
  * @sa getUIPR6(), setUIPR6(), getUIPR(), setUIPR(), getUPORTR(), setUPORTR(), getUPORT6R(), setUPORT6R()
  */
-#define _UPORT6R_            (_W6100_IO_BASE_ + (0x41C0 << 8) + WIZCHIP_CREG_BLOCK)
+#define _UPORT6R_            (_W6300_IO_BASE_ + (0x41C0 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Interrupt Pending Time Register address [R=w][0x0000]
@@ -794,7 +794,7 @@ extern "C" {
  * @sa getINTPTMR(), setINTPTMR(), getIR(), setIRCLR(), getIMR(), setIMR(), getSIR(), setSn_IRCLR(), getSIMR(), setSIMR(), \n
  *     getSLIR(), setSLIRCLR(), getSLIMR(), setSLIMR(), getSYCR1(), setSYCR1()
  */
-#define _INTPTMR_            (_W6100_IO_BASE_ + (0x41C5 << 8) + WIZCHIP_CREG_BLOCK)
+#define _INTPTMR_            (_W6300_IO_BASE_ + (0x41C5 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief RA Prefix Length Register address [RO][0x00]
@@ -802,7 +802,7 @@ extern "C" {
  * @sa SLIR_RA, _SLIRCLR_, _PFR_, _VLTR_, _PLTR_, _PAR_
  * @sa getPLR(), getSLIR(), setSLIRCLR(), getPFR(), getVLTR(), getPLTR(), getPAR()
  */
-#define _PLR_                (_W6100_IO_BASE_ + (0x41D0 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PLR_                (_W6300_IO_BASE_ + (0x41D0 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief RA Prefix Flag Register address [RO][0x00]
@@ -810,7 +810,7 @@ extern "C" {
  * @sa SLIR_RA, _SLIRCLR_, _PLR_, _VLTR_, _PLTR_, _PAR_
  * @sa getPFR(), getSLIR(), setSLIRCLR(), getPLR(), getVLTR(), getPLTR(), getPAR()
  */
-#define _PFR_                (_W6100_IO_BASE_ + (0x41D4 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PFR_                (_W6300_IO_BASE_ + (0x41D4 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief RA Valid Life Time Register address [RO][0x00000000]
@@ -818,7 +818,7 @@ extern "C" {
  * @sa SLIR_RA, _SLIRCLR_, _PLR_, _PFR_, _PLTR_, _PAR_
  * @sa getVLTR(), getSLIR(), setSLIRCLR(), getPLR(), getPFR(),  getPLTR(), getPAR()
  */
-#define _VLTR_               (_W6100_IO_BASE_ + (0x41D8 << 8) + WIZCHIP_CREG_BLOCK)
+#define _VLTR_               (_W6300_IO_BASE_ + (0x41D8 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief RA Prefered Life Time Register address [RO][0x00000000]
@@ -826,7 +826,7 @@ extern "C" {
  * @sa SLIR_RA, _SLIRCLR_, _PLR_, _PFR_, _PLTR_, _PAR_
  * @sa getPLTR(), getSLIR(), setSLIRCLR(), getPLR(), getPFR(), getVLTR(), getPAR()
  */
-#define _PLTR_               (_W6100_IO_BASE_ + (0x41DC << 8) + WIZCHIP_CREG_BLOCK)
+#define _PLTR_               (_W6300_IO_BASE_ + (0x41DC << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief RA Prefix Address Register address[RO][::]
@@ -834,7 +834,7 @@ extern "C" {
  * @sa SLIR_RA, _SLIRCLR_, _PLR_, _PFR_, _VLTR_, _PLTR_, _PAR_
  * @sa getPAR(), getPLTR(), getSLIR(), setSLIRCLR(), getPLR(), getPFR(), getVLTR() 
  */
-#define _PAR_                (_W6100_IO_BASE_ + (0x41E0 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PAR_                (_W6300_IO_BASE_ + (0x41E0 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief ICMPv6 Block Register address [R=W][0x00]
@@ -854,7 +854,7 @@ extern "C" {
  * @sa NETxMR_PB
  * @sa getICMP6BLKR(), setICMP6BLKR(), getNET6MR(), setNET6MR()
  */
-#define _ICMP6BLKR_          (_W6100_IO_BASE_ + (0x41F0 << 8) + WIZCHIP_CREG_BLOCK)
+#define _ICMP6BLKR_          (_W6300_IO_BASE_ + (0x41F0 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Chip configuration Lock Register address [WO][0x00]
@@ -863,7 +863,7 @@ extern "C" {
  * @sa _SYCR0_, _SYCR1_, _SYSR_, SYSR_CHPL
  * @sa getCHPLCKR(), setCHPLCKR(), CHIPLOCK(), CHIPUNLOCK(), getSYSR()
  */
-#define _CHPLCKR_            (_W6100_IO_BASE_ + (0x41F4 << 8) + WIZCHIP_CREG_BLOCK)
+#define _CHPLCKR_            (_W6300_IO_BASE_ + (0x41F4 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Network configuration Lock Register address [WO][0x00]
@@ -873,7 +873,7 @@ extern "C" {
  * @sa getNETLCKR(), setNETLCKR(), NETLOCK(), NETUNLOCK(), getSHAR(), setSHAR(), getSIPR(), getSIPR(), getSUBR(), setSUBR(), \n
  *     getGAR(), setGAR(), getLLAR(), setLLAR(), getGUAR(), setGUAR(), getSUB6R(), setSUB6R(), getSYSR()
  */
-#define _NETLCKR_            (_W6100_IO_BASE_ + (0x41F5 << 8) + WIZCHIP_CREG_BLOCK)
+#define _NETLCKR_            (_W6300_IO_BASE_ + (0x41F5 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief PHY configuration Lock Register address [WO][0x00]
@@ -882,7 +882,7 @@ extern "C" {
  * @sa _PHYCR0_, _PHYCR1_, _SYSR_, SYSR_PHYL.
  * @sa getPHYLCKR(), setPHYLCKR(), PHYLOCK(), PHYUNLOCK(), setPHYCR0(), getPHYCR1(), setPHYCR1(), getSYSR()
  */
-#define _PHYLCKR_            (_W6100_IO_BASE_ + (0x41F6 << 8) + WIZCHIP_CREG_BLOCK)
+#define _PHYLCKR_            (_W6300_IO_BASE_ + (0x41F6 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Retransmission Time Register address [R=W][0x07D0]
@@ -892,7 +892,7 @@ extern "C" {
  * @sa getRTR(), setRTR(), getSn_RTR(), setSn_RTR(), getRCR(), setRCR(), getSn_RCR(), setSn_RCR(),  \n
  *     getSn_CR(), getSn_CR(), getSn_IR(), setSn_IRCLR()
  */
-#define _RTR_                (_W6100_IO_BASE_ + (0x4200 << 8) + WIZCHIP_CREG_BLOCK)
+#define _RTR_                (_W6300_IO_BASE_ + (0x4200 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief Retransmission Counter Register address [R=W][0x08]
@@ -902,7 +902,7 @@ extern "C" {
  * @sa getRCR(), setRCR(), getSn_RCR(), setSn_RCR(), getRTR(), setRTR(), getSn_RTR(), setSn_RTR(), \n 
  *     getSn_CR(), getSn_CR(), getSn_IR(), setSn_IRCLR()
  */
-#define _RCR_                (_W6100_IO_BASE_ + (0x4204 << 8) + WIZCHIP_CREG_BLOCK)
+#define _RCR_                (_W6300_IO_BASE_ + (0x4204 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Retransmission Time Register address [R=W][0x07D0]
@@ -910,7 +910,7 @@ extern "C" {
  * @sa _SLRCR_, _SLIR_, _SLIRCLR_, SLIR_TOUT
  * @sa getSLRTR(), setSLRTR(), getSLRCR(), setSLRCR(), getSLIR(), setSLIRCLR() 
  */
-#define _SLRTR_              (_W6100_IO_BASE_ + (0x4208 << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLRTR_              (_W6300_IO_BASE_ + (0x4208 << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Retransmission Count Register address [R=W][0x00]
@@ -918,7 +918,7 @@ extern "C" {
  * @sa _SLRTR_, _SLIR_, _SLIRCLR_, SLIR_TOUT
  * @sa getSLRCR(), setSLRCR(), getSLRTR(), setSLRTR(), setSLIRCLR(), getSLIR(), setSLIRCLR(),
  */
-#define _SLRCR_              (_W6100_IO_BASE_ + (0x420C << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLRCR_              (_W6300_IO_BASE_ + (0x420C << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @brief SOCKET-less Hop Limit Register address [R=W][0x80]
@@ -926,15 +926,15 @@ extern "C" {
  * @sa _SLCR_
  * @sa getSLHOPR(), setSLHOPR(), getSLCR(), setSLCR()
  */
-#define _SLHOPR_             (_W6100_IO_BASE_ + (0x420F << 8) + WIZCHIP_CREG_BLOCK)
+#define _SLHOPR_             (_W6300_IO_BASE_ + (0x420F << 8) + WIZCHIP_CREG_BLOCK)
 
 /**
  * @}
  */
 
-//----------------------------- W6100 Socket Registers -----------------------------
+//----------------------------- W6300 Socket Registers -----------------------------
 /**
- * @addtogroup Socket_register_group_W6100
+ * @addtogroup Socket_register_group_W6300
  * @{
  */
 /**
@@ -984,7 +984,7 @@ extern "C" {
  * @sa _Sn_CR_, Sn_CR_OPEN, _Sn_SR_, _Sn_MR2_
  * @sa getSn_MR(), setSn_MR(), getSn_CR(), setSn_CR(), getSn_SR(), getSn_MR2(), setSn_MR2()
  */
-#define _Sn_MR_(N)           (_W6100_IO_BASE_ + (0x0000 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_MR_(N)           (_W6300_IO_BASE_ + (0x0000 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKET n Prefer Source IPv6 Address Register Address [R=W][0x00]
@@ -996,7 +996,7 @@ extern "C" {
  * @sa _Sn_CR_, _Sn_PSR_, _SLPSR_
  * @sa getSn_PSR(), setSn_PSR(), getSLCR(), setSLCR(), getSLPSR(), setSLPSR(), 
  */
- #define _Sn_PSR_(N)         (_W6100_IO_BASE_ + (0x0004 << 8) + WIZCHIP_SREG_BLOCK(N))
+ #define _Sn_PSR_(N)         (_W6300_IO_BASE_ + (0x0004 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief Socket Command Register Address [RW,AC][0x00]
@@ -1019,7 +1019,7 @@ extern "C" {
  * @sa _Sn_IR_, _Sn_IRCLR_, Sn_IMR_, _SIR_, _Sn_SR_
  * @sa getSn_CR(), setSn_CR(), getSn_IR(), setSn_IRCLR(), getSn_IMR(), setSn_IMR(), getSIR(), getSn_SR()
  */
-#define _Sn_CR_(N)           (_W6100_IO_BASE_ + (0x0010 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_CR_(N)           (_W6300_IO_BASE_ + (0x0010 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Interrupt Register Address [RO][0x00]
@@ -1040,7 +1040,7 @@ extern "C" {
  * @sa _Sn_IRCLR_, _Sn_IMR_, _SIR_, _SIMR_
  * @sa getSn_IR(), setSn_IRCLR(), getSn_IMR(), setSn_IMR(), getSIR(), getSIMR(), setSIMR()
  */
-#define _Sn_IR_(N)           (_W6100_IO_BASE_ + (0x0020 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_IR_(N)           (_W6300_IO_BASE_ + (0x0020 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Interrupt Mask Register Address [R=W][0xFF]
@@ -1048,7 +1048,7 @@ extern "C" {
  * @sa _Sn_IR_, _Sn_IRCR_, _SIR_, _SIMR_
  * @sa getSn_IMR(), setSn_IMR(), getSn_IR(), setSn_IRCLR(), getSIR(), getSIMR(), setSIMR()
  */
-#define _Sn_IMR_(N)          (_W6100_IO_BASE_ + (0x0024 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_IMR_(N)          (_W6300_IO_BASE_ + (0x0024 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Interrupt Clear Register Address [WO][0x00]
@@ -1056,7 +1056,7 @@ extern "C" {
  * @sa _Sn_IR_, _SIR_, _SIMR_
  * @sa setSn_IRCLR(), getSn_IR(), getSIR(), getSIMR(), setSIMR()
  */
-#define _Sn_IRCLR_(N)        (_W6100_IO_BASE_ + (0x0028 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_IRCLR_(N)        (_W6300_IO_BASE_ + (0x0028 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 
 
@@ -1089,7 +1089,7 @@ extern "C" {
  *  </table>
  *
  */
-#define _Sn_SR_(N)           (_W6100_IO_BASE_ + (0x0030 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_SR_(N)           (_W6300_IO_BASE_ + (0x0030 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Extension Status Register Address [RO][0x00]
@@ -1107,7 +1107,7 @@ extern "C" {
  * @sa _Sn_MR_, _Sn_PSR_
  * @sa getSn_ESR(), getSn_MR(), setSn_MR(), getSn_PSR(), setSn_PSR()
  */
-#define _Sn_ESR_(N)          (_W6100_IO_BASE_ + (0x0031 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_ESR_(N)          (_W6300_IO_BASE_ + (0x0031 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn IP Protocol Number(PN) Register Address [R/W][0x0000]
@@ -1117,7 +1117,7 @@ extern "C" {
  * @sa _Sn_NHR_, _Sn_MR_, Sn_CR_OPEN
  * @sa getSn_PNR(), setSn_PNR(), getSn_NHR(), setSn_NHR(), getSn_MR(), setSn_MR(), getSn_CR(), setSn_CR()
  */
-#define _Sn_PNR_(N)          (_W6100_IO_BASE_ + (0x0100 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_PNR_(N)          (_W6300_IO_BASE_ + (0x0100 << 8) + WIZCHIP_SREG_BLOCK(N))
 #define _Sn_NHR_(N)          (_Sn_PNR_(N))      ///< Refer to @ref _Sn_PNR_.
 
 /**
@@ -1125,7 +1125,7 @@ extern "C" {
  * @details @ref _Sn_TOSR_ sets the TOS(Type Of Service) field in IPv4 Header.
  * @sa getSn_TOSR(), setSn_TOSR()
  */
-#define _Sn_TOSR_(N)         (_W6100_IO_BASE_ + (0x0104 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_TOSR_(N)         (_W6300_IO_BASE_ + (0x0104 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn IP Time to live(TTL) Register Address [R=W][0x80]
@@ -1133,7 +1133,7 @@ extern "C" {
  * @sa _Sn_HOPR_
  * @sa getSn_TTLR(), setSn_TTLR(), getSn_HOPR(), setSn_HOPR()
  */
-#define _Sn_TTLR_(N)         (_W6100_IO_BASE_ + (0x0108 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_TTLR_(N)         (_W6300_IO_BASE_ + (0x0108 << 8) + WIZCHIP_SREG_BLOCK(N))
 #define _Sn_HOPR_(N)         (_Sn_TTLR_(N))   ///< Refer to @ref _Sn_TTLR_.
 
 /**
@@ -1142,7 +1142,7 @@ extern "C" {
  * @note @ref _WIZCHIP_ can not support IP fragment & re-assembly.\n So It is not recommended to set @ref _Sn_FRGR_ to any other value.
  * @sa getSn_FRGR(), setSn_FRGR()
  */
-#define _Sn_FRGR_(N)         (_W6100_IO_BASE_ + (0x010C << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_FRGR_(N)         (_W6300_IO_BASE_ + (0x010C << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Maximum Segment Size(MSS) Register Address [RW][0x0000]
@@ -1163,7 +1163,7 @@ extern "C" {
  * @sa _Sn_MR_, NETMR2_PPPoE
  * @sa getSn_MSSR(), setSn_MSSR(), getSn_MR(), setSn_MR(), getNETMR2(), setNETMR2()
  */
-#define _Sn_MSSR_(N)         (_W6100_IO_BASE_ + (0x0110 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_MSSR_(N)         (_W6300_IO_BASE_ + (0x0110 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Source Port Register Address [R=W][0x0000]
@@ -1173,7 +1173,7 @@ extern "C" {
  * @sa _Sn_MR_, Sn_CR_OPEN
  * @sa getSn_PORTR(), getSn_PORTR(), getSn_MR(), setSn_MR(), getSn_CR(), setSn_CR()
 */
-#define _Sn_PORTR_(N)        (_W6100_IO_BASE_ + (0x0114 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_PORTR_(N)        (_W6300_IO_BASE_ + (0x0114 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Destination Hardware Address Register Address [RW][00:00:00:00:00:00]
@@ -1187,7 +1187,7 @@ extern "C" {
  * @sa _Sn_MR_, _Sn_MR2_, _Sn_CR_, _Sn_SR_
  * @sa getSn_DHAR(), setSn_DHAR(), getSn_MR(), setSn_MR(), getSn_MR2(), setSn_MR2(), getSn_CR(), setSn_CR(), getSn_SR()
  */
-#define _Sn_DHAR_(N)         (_W6100_IO_BASE_ + (0x0118 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_DHAR_(N)         (_W6300_IO_BASE_ + (0x0118 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Destination IPv4 Address Register Address [RW][0.0.0.0]
@@ -1201,7 +1201,7 @@ extern "C" {
  * @sa _Sn_DIP4R_, _Sn_MR_, _Sn_CR_, _Sn_SR_ 
  * @sa getSn_DIPR(), getSn_DIPR(), getSn_DIP4R(), getSn_DIP4R(), getSn_MR(), setSn_MR(), getSn_CR(), setSn_CR(), getSn_SR()
  */
-#define _Sn_DIPR_(N)         (_W6100_IO_BASE_ + (0x0120 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_DIPR_(N)         (_W6300_IO_BASE_ + (0x0120 << 8) + WIZCHIP_SREG_BLOCK(N))
 #define _Sn_DIP4R_(N)        (_Sn_DIPR_(N))            ///< Refer to @ref _Sn_DIPR_.
 
 /**
@@ -1216,7 +1216,7 @@ extern "C" {
  * @sa _Sn_MR_, _Sn_CR_, _Sn_SR_
  * @sa getSn_DIP6R(), setSn_DIP6R(), getSn_MR(), setSn_MR(), getSn_CR(), setSn_CR(), getSn_SR()
  */
-#define _Sn_DIP6R_(N)        (_W6100_IO_BASE_ + (0x0130 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_DIP6R_(N)        (_W6300_IO_BASE_ + (0x0130 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Destination Port Register Address [RW][0x0000]
@@ -1233,7 +1233,7 @@ extern "C" {
  * @sa _Sn_MR_, _Sn_CR_, _Sn_SR_ 
  * @sa getSn_DPORTR(), getSn_DPORTR(), getSn_MR(), setSn_MR(), getSn_CR(), setSn_CR(), getSn_SR()
  */
-#define _Sn_DPORTR_(N)       (_W6100_IO_BASE_ + (0x0140 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_DPORTR_(N)       (_W6300_IO_BASE_ + (0x0140 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Mode Register 2 Address [R=W][0x00]
@@ -1248,7 +1248,7 @@ extern "C" {
  * @sa _Sn_MR_, _Sn_CR_
  * @sa getSn_MR2(), setSn_MR2(), getSn_MR(), getSn_MR(), getSn_CR()
  */
-#define _Sn_MR2_(N)          (_W6100_IO_BASE_ + (0x0144 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_MR2_(N)          (_W6300_IO_BASE_ + (0x0144 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 
 /**
@@ -1259,7 +1259,7 @@ extern "C" {
  * @sa _RTR_, _Sn_CR_
  * @sa getSn_RTR(), setSn_RTR(), getSn_CR(), setSn_CR()
  */
-#define _Sn_RTR_(N)          (_W6100_IO_BASE_ + (0x0180 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_RTR_(N)          (_W6300_IO_BASE_ + (0x0180 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Retransmission Count Register Address [R=W][0x00]
@@ -1269,7 +1269,7 @@ extern "C" {
  * @sa _RTR_, _Sn_CR_
  * @sa getSn_RTR(), setSn_RTR(), getSn_CR(), setSn_CR()
  */
-#define _Sn_RCR_(N)          (_W6100_IO_BASE_ + (0x0184 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_RCR_(N)          (_W6300_IO_BASE_ + (0x0184 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn Keep Alive Time Register Address [R=W][0x00]
@@ -1283,7 +1283,7 @@ extern "C" {
  * @sa Sn_CR_SEND_KEEP, Sn_IR_TIMEOUT, Sn_IRCLR, Sn_SR, Sn_MR
  * @sa getSn_KPALVTR(), setSn_KPALVTR(), getSn_IR(), setSn_IRCLR(), getSn_SR(), getSn_MR(), setSn_MR()
  */
-#define _Sn_KPALVTR_(N)      (_W6100_IO_BASE_ + (0x0188 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_KPALVTR_(N)      (_W6300_IO_BASE_ + (0x0188 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn TX Buffer Size Register Address [R=W][0x02]
@@ -1295,7 +1295,7 @@ extern "C" {
  * @sa _Sn_RX_BSR_
  * @sa getSn_TX_BSR(), setSn_TX_BSR(), getSn_TXBUF_SIZE(), setSn_TXBUF_SIZE(), getSn_TxMAX(), setSn_TX_BSR(), getSn_RX_BSR(), setSn_RX_BSR()
  */
-#define _Sn_TX_BSR_(N)       (_W6100_IO_BASE_ + (0x0200 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_TX_BSR_(N)       (_W6300_IO_BASE_ + (0x0200 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn TX Free Buffer Size Register Address [RO][0x0800]
@@ -1312,7 +1312,7 @@ extern "C" {
  * @sa _Sn_RX_RSR_, _Sn_TX_WR_, _Sn_TX_RD_, _Sn_CR_
  * @sa getSn_TX_FSR(), getSn_TX_WR(), getSn_TX_WR(), getSn_TX_RD(), getSn_CR(), setSn_CR()
  */
-#define _Sn_TX_FSR_(N)       (_W6100_IO_BASE_ + (0x0204 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_TX_FSR_(N)       (_W6300_IO_BASE_ + (0x0204 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKET TX Memory Read Pointer Register Address[R][0x0000]
@@ -1326,7 +1326,7 @@ extern "C" {
  * @sa _Sn_TX_WR_, _Sn_TX_FSR_, _Sn_CR_, _Sn_IR_, _Sn_IRCLR_, _Sn_MR_
  * @sa getSn_TX_RD(), getSn_TX_WR(), setSn_TX_WR(), getSn_TX_FSR(), getSn_CR(), setSn_CR(), getSn_IR(), setSn_IRCLR(), getSn_MR(), setSn_MR()
  */
-#define _Sn_TX_RD_(N)        (_W6100_IO_BASE_ + (0x0208 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_TX_RD_(N)        (_W6300_IO_BASE_ + (0x0208 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 
 /**
@@ -1346,7 +1346,7 @@ extern "C" {
  * @sa _Sn_TX_RD_, _Sn_TX_FSR_, _Sn_CR_, _Sn_IR_, _Sn_IRCLR_, _Sn_MR_
  * @sa getSn_TX_WR(), setSn_TX_WR(), getSn_TX_RD(), getSn_TX_FSR(), getSn_CR(), setSn_CR(), getSn_IR(), setSn_IRCLR(), getSn_MR(), setSn_MR()
  */
-#define _Sn_TX_WR_(N)        (_W6100_IO_BASE_ + (0x020C << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_TX_WR_(N)        (_W6300_IO_BASE_ + (0x020C << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn RX Buffer Size Register Address [R=W][0x02]
@@ -1358,7 +1358,7 @@ extern "C" {
  * @sa _Sn_RX_BSR_
  * @sa getSn_TX_BSR(), setSn_TX_BSR(), getSn_RXBUF_SIZE(), setSn_RXBUF_SIZE(), getSn_RxMAX(), getSn_RX_BSR(), setSn_RX_BSR()
  */
-#define _Sn_RX_BSR_(N)       (_W6100_IO_BASE_ + (0x0220 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_RX_BSR_(N)       (_W6300_IO_BASE_ + (0x0220 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn RX Received Size Register Address [RO][0x0000]
@@ -1372,7 +1372,7 @@ extern "C" {
  * @sa _Sn_RX_RSR_, _Sn_TX_WR_, _Sn_TX_RD_, _Sn_CR_, _Sn_TX_FSR_
  * @sa getSn_RX_RSR(), getSn_TX_WR(), getSn_TX_WR(), getSn_CR(), setSn_CR(), getSn_TX_FSR()
  */
-#define _Sn_RX_RSR_(N)       (_W6100_IO_BASE_ + (0x0224 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_RX_RSR_(N)       (_W6300_IO_BASE_ + (0x0224 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKET RX Memory Read Pointer Register Address[R][0x0000]
@@ -1387,7 +1387,7 @@ extern "C" {
  * @sa _Sn_RX_WR_, _Sn_RX_RSR_, _Sn_CR_, _Sn_IR_, _Sn_IRCLR_, _Sn_MR_
  * @sa getSn_RX_WR(), setSn_RX_RD(), getSn_RX_WR(), getSn_TX_FSR(), getSn_CR(), setSn_CR(), getSn_IR(), setSn_IRCLR(), getSn_MR(), setSn_MR()
  */
-#define _Sn_RX_RD_(N)        (_W6100_IO_BASE_ + (0x0228 << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_RX_RD_(N)        (_W6300_IO_BASE_ + (0x0228 << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @brief SOCKETn TX Memory Write Pointer Register Address [RW][0x0000]
@@ -1402,13 +1402,13 @@ extern "C" {
  * @sa _Sn_TX_RD_, _Sn_TX_FSR_, _Sn_CR_, _Sn_IR_, Sn_IRCLR_, _Sn_MR_
  * @sa getSn_TX_WR(), setSn_TX_WR(), getSn_TX_RD(), getSn_TX_FSR(), getSn_CR(), setSn_CR(), getSn_IR(), setSn_IRCLR(), getSn_MR(), setSn_MR()
  */
-#define _Sn_RX_WR_(N)        (_W6100_IO_BASE_ + (0x022C << 8) + WIZCHIP_SREG_BLOCK(N))
+#define _Sn_RX_WR_(N)        (_W6300_IO_BASE_ + (0x022C << 8) + WIZCHIP_SREG_BLOCK(N))
 
 /**
  * @}
  */
 
-/*----------------------------- W6100 Register values  -----------------------------*/
+/*----------------------------- W6300 Register values  -----------------------------*/
 
 /* System Status Register Bit Definition */
 /**
@@ -3076,7 +3076,7 @@ extern "C" {
 /*----------------------------For PHY Control-------------------------------*/
 
 /**
- * @ingroup Common_register_group_W6100
+ * @ingroup Common_register_group_W6300
  * @brief Basic Mode Control Register of Ethernet PHY [RW][0x3100]
  * @details @ref PHYRAR_BMCR can be controlled by MDC/MDIO controller of @ref _WIZCHIP_. \n
  *          Each bit of @ref PHYRAR_BMCR is defined as the following.
@@ -3105,7 +3105,7 @@ extern "C" {
 
 //Basic mode status register, basic register
 /**
- * @ingroup Common_register_group_W6100
+ * @ingroup Common_register_group_W6300
  * @brief Basic Mode Status Register of Ethernet PHY [RO][0x7809]
  * @details @ref PHYRAR_BMSR gets the status of Ethernet PHY through MDC/MDIO controller of @ref _WIZCHIP_. \n
  *          Each bit of @ref PHYRAR_BMSR is defined as the following.
@@ -3370,7 +3370,7 @@ extern "C" {
 //
 //
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It reads 1 byte value from a register.
  * @param AddrSel Register address
  * @return The value of register
@@ -3379,7 +3379,7 @@ extern "C" {
 uint8_t WIZCHIP_READ(uint32_t AddrSel);
 
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It writes 1 byte value to a register.
  * @param AddrSel Register address
  * @param wb Write data
@@ -3389,7 +3389,7 @@ uint8_t WIZCHIP_READ(uint32_t AddrSel);
 void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb );
 
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It reads sequentail data from registers.
  * @param AddrSel Register address
  * @param pBuf Pointer buffer to read data
@@ -3400,7 +3400,7 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb );
 void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It writes sequential data to registers.
  * @param AddrSel Register address
  * @param pBuf Pointer buffer to write data
@@ -3416,7 +3416,7 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 // Common Register IO function //
 /////////////////////////////////
 /**
- * @addtogroup Common_register_access_function_W6100
+ * @addtogroup Common_register_access_function_W6300
  * @{
  */
 #define getCIDR() \
@@ -3804,7 +3804,7 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 // SOCKETn  register I/O function //
 ////////////////////////////////////
 /**
- * @addtogroup Socket_register_access_function_W6100
+ * @addtogroup Socket_register_access_function_W6300
  * @{
  */
 #define setSn_MR(sn,mr) \
@@ -3991,7 +3991,7 @@ uint16_t getSn_RX_RSR(uint8_t s);
 // Sn_TXBUF & Sn_RXBUF IO function //
 /////////////////////////////////////
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It saves data to be sent in the SOCKETn TX buffer.
  * @details This function reads first @ref _Sn_TX_WR_ \n
  *          and starts to copy <i>wizdata</i> from @ref _Sn_TX_WR_ address of SOCKETn TX buffer as many as <i>len</i>.\n
@@ -4005,7 +4005,7 @@ uint16_t getSn_RX_RSR(uint8_t s);
 void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
 
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It reads the received data from the SOCKETn RX buffer and copies the data to your system memory specified by <i>wizdata</i>.
  * @details This function reads first @ref _Sn_RX_RD_ \n
  *          and starts to copy the received data to <i>wizdata</i> as many as <i>len</i>.\n
@@ -4019,7 +4019,7 @@ void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
 void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
 
 /**
- * @ingroup Basic_IO_function_W6100
+ * @ingroup Basic_IO_function_W6300
  * @brief It discards the received data in the SOCKETn RX buffer.
  * @details This function discards the received data by increasing @ref _Sn_RX_RD_ as manay as <i>len</i> without coping the data.
  * @param sn SOCKETn. It should be <b>0 ~ @ref _WIZCHIP_SOCK_NUM_</b>.
@@ -4030,9 +4030,9 @@ void wiz_recv_ignore(uint8_t sn, uint16_t len);
 #if 1
 // 20231019 taylor
 /**
- * @ingroup Special_function_W6100
+ * @ingroup Special_function_W6300
  * @brief Delay function
- * @details Delay function using internal 100us timer of the W6100
+ * @details Delay function using internal 100us timer of the W6300
  * @param (uint32_t)ms Time to delay in milliseconds.
  */
 void wiz_delay_ms(uint32_t ms);
@@ -4042,7 +4042,7 @@ void wiz_delay_ms(uint32_t ms);
 #if (_PHY_IO_MODE_ == _PHY_IO_MODE_MII_)
 /// @endcond
 /**
- * @ingroup Special_function_W6100
+ * @ingroup Special_function_W6300
  * @brief Write data to the PHY via MDC/MDIO interface.
  * @details Write command data to the PHY via MDC/MDIO interface.
  * @param phyregaddr Address of the PHY register. It should be @ref PHYRAR_BMCR, @ref PHYRAR_BMSR, and etc.
@@ -4052,7 +4052,7 @@ void wiz_delay_ms(uint32_t ms);
 void wiz_mdio_write(uint8_t phyregaddr, uint16_t var);
 
 /**
- * @ingroup Special_function_W6100
+ * @ingroup Special_function_W6300
  * @brief Read data from the PHY via MDC/MDIO interface.
  * @details Read command or status data from the PHY via MDC/MDIO interface.
  * @param phyregaddr Address of the PHY register. It should be @ref PHYRAR_BMCR, @ref PHYRAR_BMSR, and etc.
@@ -4074,4 +4074,4 @@ uint16_t wiz_mdio_read(uint8_t phyregaddr);
 #endif
 
 
-#endif //_W6100_H_
+#endif //_W6300_H_
