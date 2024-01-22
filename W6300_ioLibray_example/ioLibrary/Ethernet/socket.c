@@ -98,7 +98,7 @@ uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
    do{                     \
       if(len == 0) return SOCKERR_DATALEN;   \
    }while(0);              \
-
+//teddy 240122
 #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
 #define CHECK_TCPMODE()                                           \
    do{                                                            \
@@ -959,6 +959,7 @@ int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
    return SOCK_OK;
 }
 
+//teddy 240122
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 { 

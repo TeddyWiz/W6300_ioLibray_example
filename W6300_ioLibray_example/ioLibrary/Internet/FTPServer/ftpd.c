@@ -748,7 +748,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
 #endif
    			}else{
 #if 1
-   				// 20231016 taylor
+   				// 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
    				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port, 4)) != SOCK_OK){
 #else
@@ -970,7 +970,7 @@ char proc_ftpd(uint8_t sn, char * buf)
 			if(ftp.dsock_mode == ACTIVE_MODE)
 			{
 #if 1
-				// 20231016 taylor
+				// 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port, 4)) != SOCK_OK){
 #else

@@ -523,7 +523,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 
 	len = dns_makequery(0, (char *)name, pDNSMSG, MAX_DNS_BUF_SIZE);
 #if 1
-	// 20231016 taylor
+	// 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 	sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN, 4);
 #else
@@ -539,7 +539,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 		{
 			if (len > MAX_DNS_BUF_SIZE) len = MAX_DNS_BUF_SIZE;
 #if 1
-			// 20231019 taylor
+			// 20231019 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 			len = recvfrom(DNS_SOCKET, pDNSMSG, len, ip, &port, &addr_len);
 #else
@@ -570,7 +570,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 			printf("> DNS Timeout\r\n");
 #endif
 #if 1
-			// 20231016 taylor
+			// 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 			sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN, 4);
 #else

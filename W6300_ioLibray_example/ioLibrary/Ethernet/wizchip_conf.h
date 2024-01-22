@@ -91,7 +91,7 @@ extern "C" {
 #define _WIZCHIP_IO_MODE_SPI_VDM_      (_WIZCHIP_IO_MODE_SPI_ + 1) /**< SPI interface mode for variable length data*/
 #define _WIZCHIP_IO_MODE_SPI_FDM_      (_WIZCHIP_IO_MODE_SPI_ + 2) /**< SPI interface mode for fixed length data mode*/
 #define _WIZCHIP_IO_MODE_SPI_5500_     (_WIZCHIP_IO_MODE_SPI_ + 3) /**< SPI interface mode for fixed length data mode*/
-
+//teddy 240122
 #define _WIZCHIP_IO_MODE_SPI_QSPI_     (_WIZCHIP_IO_MODE_SPI_ + 4) /**< SPI interface mode for QSPI mode*/
 
 
@@ -247,6 +247,7 @@ typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
 #include "./W6100/w6100.h"
 #include "../Application/Application.h"
 
+//teddy 240122
 #elif ( _WIZCHIP_ == W6300)
 
 #define _WIZCHIP_ID_                "W6300\0"
@@ -410,6 +411,7 @@ typedef struct __WIZCHIP
       /**
        * For QSPI interface IO
        */
+	   //teddy 240122
       struct
       {
          void    (*_read_qspi)  (uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len);
@@ -428,6 +430,7 @@ extern _WIZCHIP  WIZCHIP;
  */
 typedef enum
 {
+//teddy 240122
 #if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
    CW_SYS_LOCK,           ///< Lock or Unlock @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
    CW_SYS_UNLOCK,         ///< Lock or Unlock @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
@@ -476,12 +479,14 @@ typedef enum
    CN_GET_NETMODE,  ///< Get network mode as WOL, PPPoE, Ping Block, and Force ARP mode
    CN_SET_TIMEOUT,  ///< Set network timeout as retry count and time.
    CN_GET_TIMEOUT,  ///< Get network timeout as retry count and time.
+   //teddy 240122
 #if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
    CN_SET_PREFER,   ///< Set the preferred source IPv6 address of @ref _SLCR_.\n Refer to @ref IPV6_ADDR_AUTO, @ref IPV6_ADDR_LLA, @ref IPV6_ADDR_GUA
    CN_GET_PREFER,   ///< Get the preferred source IPv6 address of @ref _SLCR_.\n Refer to @ref IPV6_ADDR_AUTO, @ref IPV6_ADDR_LLA, @ref IPV6_ADDR_GUA
 #endif
 }ctlnetwork_type;
 
+//teddy 240122
 #if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup DATA_TYPE
@@ -555,6 +560,7 @@ typedef enum
    IK_SOCK_ALL          = (0x0F << 8) ///< All Socket interrupt
 #endif      
 }intr_kind;
+//teddy 240122
 #elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup DATA_TYPE
@@ -600,6 +606,7 @@ typedef enum
 }intr_kind;
 #endif
 
+//teddy 240122
 #if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 #define SYS_CHIP_LOCK           (1<<2)   ///< CHIP LOCK. \n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
 #define SYS_NET_LOCK            (1<<1)   ///< NETWORK Information LOCK. \n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
@@ -631,6 +638,7 @@ typedef enum
 #define PHY_POWER_DOWN           1     ///< PHY power down mode 
 
 
+//teddy 240122
 #if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
 /**
  * @ingroup DATA_TYPE
@@ -697,6 +705,7 @@ typedef struct wiz_NetTimeout_t
    uint8_t  retry_cnt;     ///< retry count 
    uint16_t time_100us;    ///< time unit 100us
 }wiz_NetTimeout;
+//teddy 240122
 #elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup DATA_TYPE
@@ -902,6 +911,7 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
  */
 void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
 
+//teddy 240122
 /**
  *@brief Registers call back function for QSPI interface.
  *@param spi_rb : callback function to read using QSPI
@@ -935,6 +945,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg);
  */          
 int8_t ctlnetwork(ctlnetwork_type cntype, void* arg);
 
+//teddy 240122
 #if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup extra_functions
@@ -1028,7 +1039,8 @@ intr_kind wizchip_getinterruptmask(void);
  * @brief set the power mode of phy inside WIZCHIP. Refer to @ref PHYCFGR in W5500, @ref PHYSTATUS in W5200
  * @param pmode Settig value of power down mode.
  */   
-   int8_t wizphy_setphypmode(uint8_t pmode);    
+   int8_t wizphy_setphypmode(uint8_t pmode);  
+   //teddy 240122  
 #elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /** 
  * @ingroup extra_functions
@@ -1281,6 +1293,7 @@ int8_t wizchip_getprefix(wiz_Prefix * prefix);
     * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
     */
    void wizchip_gettimeout(wiz_NetTimeout* nettime);
+   //teddy 240122
 #elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
    /**
     * @ingroup extra_functions

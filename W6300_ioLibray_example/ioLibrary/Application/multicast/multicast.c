@@ -22,7 +22,7 @@ int32_t multicast_loopback(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint
          {
             if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
 #if 1
-            // 20231019 taylor
+            // 20231019 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100)|| (_WIZCHIP_ == 6300))
             ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport, &addr_len);
 #else
@@ -43,7 +43,7 @@ int32_t multicast_loopback(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint
             while(sentsize != size)
             {
 #if 1
-            	// 20231016 taylor
+            	// 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
             	ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport, 4);
 #else
@@ -102,7 +102,7 @@ int32_t multicast_recv(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint16_t
          {
             if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
 #if 1
-            // 20231019 taylor
+            // 20231019 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
             ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport, &addr_len);
 #else

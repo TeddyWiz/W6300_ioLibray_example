@@ -145,7 +145,7 @@
 //A20150601 : For Integrating with W5300
 #define PACK_FIFOBYTE            0x02              ///< Valid only W5300, It indicate to have read already the Sn_RX_FIFOR.
 //
-
+//teddy 240122
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 
 /*
@@ -298,7 +298,7 @@ int8_t  listen(uint8_t sn);
  *                @ref SOCK_BUSY         - In non-block io mode, it returned immediately\n
  */
 int8_t  connect(uint8_t sn, uint8_t * addr, uint16_t port);
-
+//teddy 240122
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
  /**
   * @ingroup WIZnet_socket_APIs
@@ -412,7 +412,7 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len);
  *                        @ref SOCK_BUSY           - Socket is busy. 
  */
 int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port);
-
+//teddy 240122
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 /**
  * @ingroup WIZnet_socket_APIs
@@ -474,6 +474,8 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
  *                       @ref SOCKBUSY           - Socket is busy.
  */
 int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port);
+
+//teddy 240122
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 /**
  * @ingroup WIZnet_socket_APIs
@@ -549,6 +551,8 @@ typedef enum
    CS_GET_MAXRXBUF,        ///< get the size of socket buffer allocated in RX memory
    CS_CLR_INTERRUPT,       ///< clear the interrupt of socket with @ref sockint_kind
    CS_GET_INTERRUPT,       ///< get the socket interrupt. refer to @ref sockint_kind
+   
+   //teddy 240122
 #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
    CS_SET_PREFER,          ///< set the preferred source IPv6 address of transmission packet.\n Refer to @ref SRCV6_PREFER_AUTO, @ref SRCV6_PREFER_LLA and @ref SRCV6_PREFER_GUA.
    CS_GET_PREFER,          ///< get the preferred source IPv6 address of transmission packet.\n Refer to @ref SRCV6_PREFER_AUTO, @ref SRCV6_PREFER_LLA and @ref SRCV6_PREFER_GUA.
@@ -581,6 +585,8 @@ typedef enum
    SO_SENDBUF,          ///< Valid only in getsockopt. Get the free data size of Socekt TX buffer. @ref Sn_TX_FSR, @ref getSn_TX_FSR()
    SO_RECVBUF,          ///< Valid only in getsockopt. Get the received data size in socket RX buffer. @ref Sn_RX_RSR, @ref getSn_RX_RSR()
    SO_STATUS,           ///< Valid only in getsockopt. Get the socket status. @ref Sn_SR, @ref getSn_SR()
+   
+   //teddy 240122
 #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
      SO_EXTSTATUS,        ///< Valid only in @ref getsockopt(). Get the extended TCP SOCKETn status. @ref getSn_ESR()
      SO_MODE,
@@ -670,6 +676,7 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
   */
 int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg);
 
+//teddy 240122
 #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
    /**
     * @ingroup WIZnet_socket_APIs
