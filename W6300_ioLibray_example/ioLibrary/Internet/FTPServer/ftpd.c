@@ -749,7 +749,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
    			}else{
 #if 1
    				// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
    				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port, 4)) != SOCK_OK){
 #else
    				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port)) != SOCK_OK){
@@ -971,7 +971,7 @@ char proc_ftpd(uint8_t sn, char * buf)
 			{
 #if 1
 				// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port, 4)) != SOCK_OK){
 #else
 				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port)) != SOCK_OK){

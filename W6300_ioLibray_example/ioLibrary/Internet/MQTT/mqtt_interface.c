@@ -177,7 +177,7 @@ int ConnectNetwork(Network* n, uint8_t* ip, uint16_t port)
 
 #if 1
 	// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 	if(connect(n->my_socket, ip, port, 4) != SOCK_OK)
 #else
 	if(connect(n->my_socket, ip, port) != SOCK_OK)

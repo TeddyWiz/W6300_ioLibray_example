@@ -34,17 +34,18 @@
 #include "W6300.h"
 
 
-
+#if 0
 #define _WIZCHIP_SPI_VDM_OP_    0x00
 #define _WIZCHIP_SPI_FDM_LEN1_  0x01
 #define _WIZCHIP_SPI_FDM_LEN2_  0x02
 #define _WIZCHIP_SPI_FDM_LEN4_  0x03
+#endif
 //
 // If you want to use SPI FDM mode, Feel free contact to WIZnet. 
 // http://forum.wiznet.io
 //
 
-#if _WIZCHIP_ == 6100
+#if _WIZCHIP_ == 6300
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -53,17 +54,26 @@
 //////////////////////////////////////////////////
 void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
 {
+
+   WIZCHIP_CRITICAL_ENTER();
+
+#if( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_QSPI_))
+
+   uint8_t opcode = 0;
+   uint16_t ADDR = 0;
+   opcode = (uint8_t)((AddrSel & 0x000000FF)|(_W6300_SPI_WRITE_)|(_WIZCHIP_QSPI_MODE_));
+   ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
+   WIZCHIP.IF.QSPI._write_qspi(opcode, ADDR, &wb, 1);
+
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
+
    uint8_t tAD[4];
    tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
    tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
-   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+   tAD[2] = (uint8_t)((AddrSel & 0x000000ff)|(_W6100_SPI_WRITE_)|(QSPI_SINGLE_MODE));
    tAD[3] = wb;
 
-   WIZCHIP_CRITICAL_ENTER();
    WIZCHIP.CS._select();
-
-#if( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
-   tAD[2] |= (_W6300_SPI_WRITE_ | _W6300_SPI_OP_);
    if(!WIZCHIP.IF.SPI._write_burst) 	// byte operation
    {
       WIZCHIP.IF.SPI._write_byte(tAD[0]);
@@ -75,9 +85,16 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    {
       WIZCHIP.IF.SPI._write_burst(tAD, 4);
    }
+   WIZCHIP.CS._deselect();
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
+
+   uint8_t tAD[4];
+   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
+   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+   tAD[3] = wb;
+
 #if 1
-   // 20231103 taylor
    WIZCHIP.IF.BUS._write_data_buf(IDM_AR0, tAD, 4, 1);
 #else
    WIZCHIP.IF.BUS._write_data(IDM_AR0, tAD, 4, 1);
@@ -86,23 +103,31 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    #error "Unknown _WIZCHIP_IO_MODE_ in W6300. !!!"
 #endif
 
-   WIZCHIP.CS._deselect();
    WIZCHIP_CRITICAL_EXIT();
 }
 
 uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 {
    uint8_t ret;
+
+   WIZCHIP_CRITICAL_ENTER();
+
+#if( (_WIZCHIP_IO_MODE_ ==  _WIZCHIP_IO_MODE_SPI_QSPI_))
+
+   uint8_t opcode = 0;
+   uint16_t ADDR = 0;
+   opcode = (uint8_t)((AddrSel & 0x000000FF)|(_W6300_SPI_READ_)|(_WIZCHIP_QSPI_MODE_));
+   ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
+   WIZCHIP.IF.QSPI._read_qspi(opcode, ADDR, &ret, 1);
+
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
+
    uint8_t tAD[3];
    tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
    tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
-   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+   tAD[2] = (uint8_t)((AddrSel & 0x000000ff)|(_W6300_SPI_READ_)|(QSPI_SINGLE_MODE));
 
-   WIZCHIP_CRITICAL_ENTER();
    WIZCHIP.CS._select();
-
-#if( (_WIZCHIP_IO_MODE_ ==  _WIZCHIP_IO_MODE_SPI_VDM_))
-   tAD[2] |= (_W6300_SPI_READ_ | _W6300_SPI_OP_);
    if(!WIZCHIP.IF.SPI._read_burst || !WIZCHIP.IF.SPI._write_burst) 	// byte operation
    {
       WIZCHIP.IF.SPI._write_byte(tAD[0]);
@@ -114,32 +139,47 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
       WIZCHIP.IF.SPI._write_burst(tAD, 3);
    }
    ret = WIZCHIP.IF.SPI._read_byte();
-#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
+
+   WIZCHIP.CS._deselect();
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )\
+
+   uint8_t tAD[3];
+   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
+   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+
    WIZCHIP.IF.BUS._write_data_buf(IDM_AR0,tAD,3,1);
    ret = WIZCHIP.IF.BUS._read_data(IDM_DR);
 #else
    #error "Unknown _WIZCHIP_IO_MODE_ in W6300. !!!"   
 #endif
 
-   WIZCHIP.CS._deselect();
    WIZCHIP_CRITICAL_EXIT();
    return ret;
 }
 
 void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 {
-   uint8_t tAD[3];
-   uint16_t i = 0;
-  
-   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
-   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
-   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
 
    WIZCHIP_CRITICAL_ENTER();
-   WIZCHIP.CS._select();
 
-#if((_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
-   tAD[2] |= (_W6300_SPI_WRITE_ | _W6300_SPI_OP_);
+#if((_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_QSPI_))
+
+   uint8_t opcode = 0;
+   uint16_t ADDR = 0;
+   opcode = (uint8_t)((AddrSel & 0x000000FF)|(_W6300_SPI_WRITE_)|(_WIZCHIP_QSPI_MODE_));
+   ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
+   WIZCHIP.IF.QSPI._write_qspi(opcode, ADDR, pBuf, len);
+   
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
+   uint8_t tAD[3];
+   uint16_t i = 0;
+
+   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
+   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[2] = (uint8_t)((AddrSel & 0x000000ff)|(_W6100_SPI_WRITE_)|(QSPI_SINGLE_MODE));
+
+      WIZCHIP.CS._select();
    if(!WIZCHIP.IF.SPI._write_burst) 	// byte operation
    {
       WIZCHIP.IF.SPI._write_byte(tAD[0]);
@@ -155,30 +195,47 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
      WIZCHIP.IF.SPI._write_burst(tAD, 3);
      WIZCHIP.IF.SPI._write_burst(pBuf, len);
    }
+      WIZCHIP.CS._deselect();
+
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
+   uint8_t tAD[3];
+
+   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
+   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+
    WIZCHIP.IF.BUS._write_data_buf(IDM_AR0,tAD, 3, 1);
    WIZCHIP.IF.BUS._write_data_buf(IDM_DR,pBuf,len, 0);
 #else
    #error "Unknown _WIZCHIP_IO_MODE_ in W6300. !!!!"
 #endif
 
-   WIZCHIP.CS._deselect();
    WIZCHIP_CRITICAL_EXIT();
 }
 
 void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 {
-   uint8_t tAD[3];
-   uint16_t i;
-   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
-   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
-   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+
 
    WIZCHIP_CRITICAL_ENTER();
-   WIZCHIP.CS._select();
 
-#if((_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
-   tAD[2] |= (_W6300_SPI_READ_ | _W6300_SPI_OP_);
+#if((_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_QSPI_))
+
+   uint8_t opcode = 0;
+   uint16_t ADDR = 0;
+   opcode = (uint8_t)((AddrSel & 0x000000FF)|(_W6300_SPI_READ_)|(_WIZCHIP_QSPI_MODE_));
+   ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
+   WIZCHIP.IF.QSPI._read_qspi(opcode, ADDR, pBuf, len);
+
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_))
+   uint8_t tAD[3];
+   uint16_t i;
+
+   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
+   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[2] = (uint8_t)((AddrSel & 0x000000ff)|(_W6300_SPI_READ_)|(QSPI_SINGLE_MODE));
+
+   WIZCHIP.CS._select();
    if(!WIZCHIP.IF.SPI._read_burst || !WIZCHIP.IF.SPI._write_burst) 	// byte operation
    {
       WIZCHIP.IF.SPI._write_byte(tAD[0]);
@@ -194,14 +251,21 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 		  WIZCHIP.IF.SPI._write_burst(tAD, 3);
 		  WIZCHIP.IF.SPI._read_burst(pBuf, len);
    }
-   
+   WIZCHIP.CS._deselect();
+
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
+   uint8_t tAD[3];
+
+   tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
+   tAD[1] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[2] = (uint8_t)(AddrSel & 0x000000ff);
+
    WIZCHIP.IF.BUS._write_data_buf(IDM_AR0,tAD,3,1);
    WIZCHIP.IF.BUS._read_data_buf(IDM_DR,pBuf,len,0);
 #else
    #error "Unknown _WIZCHIP_IO_MODE_ in W6300. !!!!"
 #endif
-   WIZCHIP.CS._deselect();
+
    WIZCHIP_CRITICAL_EXIT();
 }
 

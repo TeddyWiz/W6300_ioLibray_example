@@ -46,13 +46,13 @@ extern "C" {
 #if      (_WIZCHIP_ == W6300)
 /// @endcond
 
-#define _W6300_SPI_READ_                  (0x00 << 2)        ///< SPI interface Read operation in Control Phase
-#define _W6300_SPI_WRITE_                 (0x01 << 2)        ///< SPI interface Write operation in Control Phase
+#define _W6300_SPI_READ_                  (0x00 << 5)        ///< SPI interface Read operation in Control Phase
+#define _W6300_SPI_WRITE_                 (0x01 << 5)        ///< SPI interface Write operation in Control Phase
 
-#define WIZCHIP_CREG_BLOCK                (0x00   <<3)       ///< Common register block
-#define WIZCHIP_SREG_BLOCK(N)             ((1+4*N)<<3)       ///< SOCKETn register block
-#define WIZCHIP_TXBUF_BLOCK(N)            ((2+4*N)<<3)       ///< SOCKETn Tx buffer address block
-#define WIZCHIP_RXBUF_BLOCK(N)            ((3+4*N)<<3)       ///< SOCKETn Rx buffer address block
+#define WIZCHIP_CREG_BLOCK                (0x00   )       ///< Common register block
+#define WIZCHIP_SREG_BLOCK(N)             ((1+4*N))       ///< SOCKETn register block
+#define WIZCHIP_TXBUF_BLOCK(N)            ((2+4*N))       ///< SOCKETn Tx buffer address block
+#define WIZCHIP_RXBUF_BLOCK(N)            ((3+4*N))       ///< SOCKETn Rx buffer address block
 
 #define WIZCHIP_OFFSET_INC(ADDR, N) (ADDR + (N<<8)) ///< Increase offset address
 

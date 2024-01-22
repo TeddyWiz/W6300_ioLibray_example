@@ -223,7 +223,7 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
    return 1;
 }
 
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 
 //static uint16_t j=0;
 static uint16_t any_port = 	50000;

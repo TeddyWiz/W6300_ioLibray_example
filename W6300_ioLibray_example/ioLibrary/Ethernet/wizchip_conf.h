@@ -71,9 +71,10 @@ extern "C" {
 #define W5300						5300
 #define W5500						5500
 #define W6100						6100
+#define W6300                       6300
 
 #ifndef _WIZCHIP_
-#define _WIZCHIP_                      W5100S   // W5100, W5100S, W5200, W5300, W5500
+#define _WIZCHIP_                      W6300   // W5100, W5100S, W5200, W5300, W5500, 6300
 #endif
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
@@ -90,6 +91,10 @@ extern "C" {
 #define _WIZCHIP_IO_MODE_SPI_VDM_      (_WIZCHIP_IO_MODE_SPI_ + 1) /**< SPI interface mode for variable length data*/
 #define _WIZCHIP_IO_MODE_SPI_FDM_      (_WIZCHIP_IO_MODE_SPI_ + 2) /**< SPI interface mode for fixed length data mode*/
 #define _WIZCHIP_IO_MODE_SPI_5500_     (_WIZCHIP_IO_MODE_SPI_ + 3) /**< SPI interface mode for fixed length data mode*/
+
+#define _WIZCHIP_IO_MODE_SPI_QSPI_     (_WIZCHIP_IO_MODE_SPI_ + 4) /**< SPI interface mode for QSPI mode*/
+
+
 
 /**
  * @brief PHY can be accessed by @ref _PHYCR0_, _PHYCR1_.
@@ -242,8 +247,42 @@ typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
 #include "./W6100/w6100.h"
 #include "../Application/Application.h"
 
+#elif ( _WIZCHIP_ == W6300)
+
+#define _WIZCHIP_ID_                "W6300\0"
+
+
+
+
+/**
+* @brief Define @ref _WIZCHIP_ interface mode.
+* @todo You should select interface mode of @ref _WIZCHIP_.\n\n
+*       Select one of @ref _WIZCHIP_IO_MODE_SPI_QSPI_, @ref _WIZCHIP_IO_MODE_SPI_VDM_,@ref _WIZCHIP_IO_MODE_BUS_INDIR_
+* @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
+*/
+#define QSPI_SINGLE_MODE            (0x00 << 6)
+#define QSPI_DUAL_MODE              (0x01 << 6)
+#define QSPI_QUAD_MODE              (0x02 << 6)
+
+#if 1
+#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_QSPI_
+#define _WIZCHIP_QSPI_MODE_          QSPI_SINGLE_MODE
+
+#elif 0
+#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPI_VDM_
+#define _WIZCHIP_QSPI_MODE          QSPI_SINGLE_MODE
+
 #else
-   #error "Unknown defined _WIZCHIP_. You should define one of 5100, 5200, 5300, 5500 and 6100 !!!"
+#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
+#endif
+
+typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
+//typedef   int16_t   datasize_t;     ///< sent or received data size
+#include "./W6300/w6300.h"
+#include "../Application/Application.h"
+
+#else
+   #error "Unknown defined _WIZCHIP_. You should define one of 5100, 5200, 5300, 5500, 6100 and 6300!!!"
 #endif
 
 #ifndef _WIZCHIP_IO_MODE_
@@ -367,6 +406,15 @@ typedef struct __WIZCHIP
          void    (*_read_burst)  (uint8_t* pBuf, uint16_t len);
          void    (*_write_burst) (uint8_t* pBuf, uint16_t len);
       }SPI;
+
+      /**
+       * For QSPI interface IO
+       */
+      struct
+      {
+         void    (*_read_qspi)  (uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len);
+         void    (*_write_qspi) (uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len);
+      }QSPI;
       // To be added
       //
    }IF;
@@ -380,7 +428,7 @@ extern _WIZCHIP  WIZCHIP;
  */
 typedef enum
 {
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
    CW_SYS_LOCK,           ///< Lock or Unlock @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
    CW_SYS_UNLOCK,         ///< Lock or Unlock @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
    CW_GET_SYSLOCK,        ///< Get the lock status of @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
@@ -428,13 +476,13 @@ typedef enum
    CN_GET_NETMODE,  ///< Get network mode as WOL, PPPoE, Ping Block, and Force ARP mode
    CN_SET_TIMEOUT,  ///< Set network timeout as retry count and time.
    CN_GET_TIMEOUT,  ///< Get network timeout as retry count and time.
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
    CN_SET_PREFER,   ///< Set the preferred source IPv6 address of @ref _SLCR_.\n Refer to @ref IPV6_ADDR_AUTO, @ref IPV6_ADDR_LLA, @ref IPV6_ADDR_GUA
    CN_GET_PREFER,   ///< Get the preferred source IPv6 address of @ref _SLCR_.\n Refer to @ref IPV6_ADDR_AUTO, @ref IPV6_ADDR_LLA, @ref IPV6_ADDR_GUA
 #endif
 }ctlnetwork_type;
 
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup DATA_TYPE
  * @brief  Network Service Control Type enumeration
@@ -507,7 +555,7 @@ typedef enum
    IK_SOCK_ALL          = (0x0F << 8) ///< All Socket interrupt
 #endif      
 }intr_kind;
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup DATA_TYPE
  * @brief Interrupt Kind
@@ -552,7 +600,7 @@ typedef enum
 }intr_kind;
 #endif
 
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 #define SYS_CHIP_LOCK           (1<<2)   ///< CHIP LOCK. \n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
 #define SYS_NET_LOCK            (1<<1)   ///< NETWORK Information LOCK. \n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
 #define SYS_PHY_LOCK            (1<<0)   ///< PHY LOCK.\n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
@@ -583,7 +631,7 @@ typedef enum
 #define PHY_POWER_DOWN           1     ///< PHY power down mode 
 
 
-#if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100
+#if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
 /**
  * @ingroup DATA_TYPE
  *  It configures PHY configuration when CW_SET PHYCONF or CW_GET_PHYCONF in W5500,  
@@ -649,7 +697,7 @@ typedef struct wiz_NetTimeout_t
    uint8_t  retry_cnt;     ///< retry count 
    uint16_t time_100us;    ///< time unit 100us
 }wiz_NetTimeout;
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup DATA_TYPE
  * @brief IP Address Configuration Mode
@@ -855,6 +903,16 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
 void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
 
 /**
+ *@brief Registers call back function for QSPI interface.
+ *@param spi_rb : callback function to read using QSPI
+ *@param spi_wb : callback function to write using QSPI
+ *@todo Describe \ref wizchip_qspi_read and \ref wizchip_qspi_write function
+ *or register your functions.
+ *@note If you do not describe or register, null function is called.
+ */
+void reg_wizchip_qspi_cbfunc(void (*qspi_rb)(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len), void (*qspi_wb)(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len));
+
+/**
  * @ingroup extra_functions
  * @brief Controls to the WIZCHIP.
  * @details Resets WIZCHIP & internal PHY, Configures PHY mode, Monitor PHY(Link,Speed,Half/Full/Auto),
@@ -877,7 +935,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg);
  */          
 int8_t ctlnetwork(ctlnetwork_type cntype, void* arg);
 
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /**
  * @ingroup extra_functions
  * @brief Controls to network service.
@@ -971,7 +1029,7 @@ intr_kind wizchip_getinterruptmask(void);
  * @param pmode Settig value of power down mode.
  */   
    int8_t wizphy_setphypmode(uint8_t pmode);    
-#elif (_WIZCHIP_ == W6100)
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
 /** 
  * @ingroup extra_functions
  * @brief Reset the integrated PHY.
@@ -1223,7 +1281,7 @@ int8_t wizchip_getprefix(wiz_Prefix * prefix);
     * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
     */
    void wizchip_gettimeout(wiz_NetTimeout* nettime);
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
    /**
     * @ingroup extra_functions
     * @brief Set the network information for @ref _WIZCHIP_

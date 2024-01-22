@@ -266,7 +266,7 @@ int8_t SNTP_run(datetime *time)
 			if (RSR_len > MAX_SNTP_BUF_SIZE) RSR_len = MAX_SNTP_BUF_SIZE;	// if Rx data size is lager than TX_RX_MAX_BUF_SIZE
 #if 1
 			// 20231019 taylor
-			#if (_WIZCHIP_ == 6100)
+			#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 			recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport, &addr_len);
 			#else
 			recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport);
@@ -295,7 +295,7 @@ int8_t SNTP_run(datetime *time)
 			{
 #if 1
 				// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 				sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port, 4);
 #else
 				sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
@@ -311,7 +311,7 @@ int8_t SNTP_run(datetime *time)
 				{
 #if 1
 					// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 					sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port, 4);
 #else
 					sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);

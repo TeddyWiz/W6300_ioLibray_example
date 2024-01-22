@@ -149,7 +149,7 @@ static int send_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t i
 
 #if 1
 	// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 	snd_len = sendto(socket, packet, len, (uint8_t *)&ip, port, 4);
 #else
 	snd_len = sendto(socket, packet, len, (uint8_t *)&ip, port);
@@ -192,7 +192,7 @@ static int recv_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t *
 		if(recv_len) {
 #if 1
 			// 20231019 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 			recv_len = recvfrom(socket, packet, len, (uint8_t *)ip, port, &addr_len);
 #else
 			recv_len = recvfrom(socket, packet, len, (uint8_t *)ip, port);

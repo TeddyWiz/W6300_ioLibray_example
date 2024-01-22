@@ -212,7 +212,23 @@ void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len)
 #else
 void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {}
 #endif
+#if 1   //teddy 240122
 
+/**
+ * @brief Default function to read in QSPI interface.
+ * @note This function help not to access wrong address. If you do not describe this function or register any functions,
+ * null function is called.
+ */
+void wizchip_qspi_read(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len) {}
+
+/**
+ * @brief Default function to write in QSPI interface.
+ * @note This function help not to access wrong address. If you do not describe this function or register any functions,
+ * null function is called.
+ */
+void wizchip_qspi_write(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len) {}
+
+#endif
 /**
  * @\ref _WIZCHIP instance
  */
@@ -263,7 +279,7 @@ _WIZCHIP  WIZCHIP =
 static uint8_t    _DNS_[4];      // DNS server ip address
 #if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 static dhcp_mode  _DHCP_;        // DHCP mode
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 static uint8_t      _DNS6_[16];    ///< DSN server IPv6 address
 static ipconf_mode  _IPMODE_;      ///< IP configuration mode
 #endif
@@ -388,16 +404,33 @@ void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), vo
       WIZCHIP.IF.SPI._write_burst  = spi_wb;
    }
 }
+#if 1 //teddy 240122
+void reg_wizchip_qspi_cbfunc(void (*qspi_rb)(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len), void (*qspi_wb)(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len))
+{
+   while(!(WIZCHIP.if_mode & _WIZCHIP_IO_MODE_SPI_QSPI_));
+
+   if(!qspi_rb || !qspi_wb)
+   {
+      WIZCHIP.IF.QSPI._read_qspi   = wizchip_qspi_read;
+      WIZCHIP.IF.QSPI._write_qspi  = wizchip_qspi_write;
+   }
+   else
+   {
+      WIZCHIP.IF.QSPI._read_qspi   = qspi_rb;
+      WIZCHIP.IF.QSPI._write_qspi  = qspi_wb;
+   }
+}
+#endif
 
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
 {
-#if	_WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100
+#if	_WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
    uint8_t tmp = *(uint8_t*) arg;
 #endif
    uint8_t* ptmp[2] = {0,0};
    switch(cwtype)
    {
-#if _WIZCHIP_ == W6100
+#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
       case CW_SYS_LOCK:
          if(tmp & SYS_CHIP_LOCK) CHIPLOCK();
          if(tmp & SYS_NET_LOCK)  NETLOCK();
@@ -443,7 +476,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
       case CW_GET_INTRTIME:
          *(uint16_t*)arg = getINTLEVEL();
          break;
-   #elif (_WIZCHIP_ == W6100)   
+   #elif ((_WIZCHIP_ == W6100) || (_WIZCHIP_ == W6300))
       case CW_SET_INTRTIME:
          setINTPTMR(*(uint16_t*)arg);
          break;
@@ -462,13 +495,13 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
          break;
 #if 1
          // 20231017 taylor
-   #if _WIZCHIP_ == W6100
+   #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
       case CW_GET_VER:
     	  *(uint16_t*)arg = getVER();
     	  break;
    #endif
 #endif
-   #if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100
+   #if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
       case CW_RESET_PHY:
          wizphy_reset();
          break;
@@ -489,14 +522,14 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
 #endif
          break;
       case CW_SET_PHYPOWMODE:
-      #if _WIZCHIP_ == W6100
+      #if _WIZCHIP_ == W6100 ||_WIZCHIP_ == W6300
         wizphy_setphypmode(*(uint8_t*)arg);
         break;
       #else
          return wizphy_setphypmode(*(uint8_t*)arg);
       #endif
    #endif
-   #if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100
+   #if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
       case CW_GET_PHYPOWMODE:
          tmp = wizphy_getphypmode();
          if((int8_t)tmp == -1) return -1;
@@ -529,7 +562,7 @@ int8_t ctlnetwork(ctlnetwork_type cntype, void* arg)
       case CN_SET_NETMODE:
       #if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
          return wizchip_setnetmode(*(netmode_type*)arg);
-      #elif (_WIZCHIP_ == 6100)
+      #elif ((_WIZCHIP_ == 6100)||(_WIZCHIP_ == W6300))
          wizchip_setnetmode(*(netmode_type*)arg);
       #endif
       case CN_GET_NETMODE:
@@ -541,7 +574,7 @@ int8_t ctlnetwork(ctlnetwork_type cntype, void* arg)
       case CN_GET_TIMEOUT:
          wizchip_gettimeout((wiz_NetTimeout*)arg);
          break;
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == 6100)||(_WIZCHIP_ == 6300))
       case CN_SET_PREFER:
          setSLPSR(*(uint8_t*)arg);
          break;
@@ -559,7 +592,7 @@ void wizchip_sw_reset(void)
 {
    uint8_t gw[4], sn[4], sip[4];
    uint8_t mac[6];
-#if (_WIZCHIP_ == W6100)
+#if ((_WIZCHIP_ == 6100) ||(_WIZCHIP_ == 6300))
    uint8_t gw6[16], sn6[16], lla[16], gua[16];
    uint8_t islock = getSYSR();
 #endif
@@ -584,7 +617,7 @@ void wizchip_sw_reset(void)
    setGAR(gw);
    setSUBR(sn);
    setSIPR(sip);
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == 6100)||(_WIZCHIP_ == W6300))
   CHIPUNLOCK();
   
   getSHAR(mac);
@@ -692,7 +725,7 @@ void wizchip_clrinterrupt(intr_kind intr)
    uint8_t ir  = (uint8_t)intr;
    uint8_t sir = (uint8_t)((uint16_t)intr >> 8);
 
-#if _WIZCHIP_ == W6100
+#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
    int i;
    uint8_t slir = (uint8_t)((uint32_t)intr >> 16);
    setIRCLR(ir);
@@ -761,7 +794,7 @@ intr_kind wizchip_getinterrupt(void)
 #endif
   ret = sir;
   ret = (ret << 8) + ir;
-#if _WIZCHIP_ == W6100
+#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
   ret = (((uint32_t)getSLIR())<<16) | ret;
 #endif
 
@@ -789,7 +822,7 @@ void wizchip_setinterruptmask(intr_kind intr)
 #else
    setIMR(imr);
    setSIMR(simr);
-#if _WIZCHIP_ == W6100
+#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
    uint8_t slimr = (uint8_t)((uint32_t)intr >> 16);
    setSLIMR(slimr);
 #endif
@@ -823,7 +856,7 @@ intr_kind wizchip_getinterruptmask(void)
   ret = simr;
   ret = (ret << 8) + imr;
   
-#if _WIZCHIP_ == W6100
+#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
   ret = (((uint32_t)getSLIMR())<<16) | ret;
 #endif
   
@@ -842,7 +875,7 @@ int8_t wizphy_getphylink(void)
 #elif _WIZCHIP_ == W5500
    if(getPHYCFGR() & PHYCFGR_LNK_ON)
       tmp = PHY_LINK_ON;
-#elif _WIZCHIP_ == W6100
+#elif _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
 #if (_PHY_IO_MODE_ == _PHY_IO_MODE_PHYCR_)
       return (getPHYSR() & PHYSR_LNK);
 #elif (_PHY_IO_MODE_ == _PHY_IO_MODE_MII_)
@@ -870,7 +903,7 @@ int8_t wizphy_getphypmode(void)
          tmp = PHY_POWER_DOWN;
       else 
          tmp = PHY_POWER_NORM;
-   #elif _WIZCHIP_ == W6100
+   #elif _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300 
    #if (_PHY_IO_MODE_ == _PHY_IO_MODE_PHYCR_)
       if (getPHYCR1() & PHYCR1_PWDN)              return PHY_POWER_DOWN;
     #elif (_PHY_IO_MODE_ == _PHY_IO_MODE_MII_)
@@ -1076,7 +1109,7 @@ int8_t wizphy_setphypmode(uint8_t pmode)
    return -1;
 }
 
-#elif _WIZCHIP_ == W6100
+#elif _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
 void wizphy_reset(void)
 {
 #if (_PHY_IO_MODE_ == _PHY_IO_MODE_PHYCR_)
@@ -1340,7 +1373,7 @@ void wizchip_gettimeout(wiz_NetTimeout* nettime)
    nettime->retry_cnt = getRCR();
    nettime->time_100us = getRTR();
 }
-#elif (_WIZCHIP_ == 6100)
+#elif ((_WIZCHIP_ == 6100) ||(_WIZCHIP_ == 6300))
 void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
 {
    uint8_t i=0;

@@ -163,7 +163,7 @@ int32_t snmpd_run(void)
 			{
 #if 1
 				// 20231019 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 				request_msg.len= recvfrom(SOCK_SNMP_AGENT, request_msg.buffer, len, svr_addr, &svr_port, &addr_len);
 #else
 				request_msg.len= recvfrom(SOCK_SNMP_AGENT, request_msg.buffer, len, svr_addr, &svr_port);
@@ -193,7 +193,7 @@ int32_t snmpd_run(void)
 				{
 #if 1
 					// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 					sendto(SOCK_SNMP_AGENT, response_msg.buffer, response_msg.index, svr_addr, svr_port, 4);
 #else
 					sendto(SOCK_SNMP_AGENT, response_msg.buffer, response_msg.index, svr_addr, svr_port);
@@ -902,7 +902,7 @@ int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community,
 		socket(SOCK_SNMP_TRAP, Sn_MR_UDP, PORT_SNMP_TRAP, 0);
 #if 1
 		// 20231016 taylor
-#if (_WIZCHIP_ == 6100)
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 		sendto(SOCK_SNMP_TRAP, packet_trap, packet_index, managerIP, PORT_SNMP_TRAP, 4);
 #else
 		sendto(SOCK_SNMP_TRAP, packet_trap, packet_index, managerIP, PORT_SNMP_TRAP);

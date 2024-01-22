@@ -47,15 +47,16 @@ OSPI_RegularCmdTypeDef com;
 /* Private variables ---------------------------------------------------------*/
 
 OSPI_HandleTypeDef hospi1;
+MDMA_HandleTypeDef hmdma_octospi1_fifo_th;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t W6300_mode = 0x02;//0; //W6100 >> 0xFF
+uint8_t W6300_mode = 0x00;//0; //W6100 >> 0xFF
 wiz_NetInfo gWIZNETINFO = {.mac = {0x00, 0x08, 0xdc, 0x12, 0x34, 0x45},
-                           .ip = {192, 168, 10, 10},
+                           .ip = {192, 168, 15, 100},
                            .sn = {255, 255, 255, 0},
-                           .gw = {192, 168, 10, 1},
+                           .gw = {192, 168, 15, 1},
                            .dns = {8, 8, 8, 8},
                            .lla = {0xfe, 0x80, 0x00, 0x00,
                                    0x00, 0x00, 0x00, 0x00,
@@ -94,13 +95,14 @@ uint8_t Router_IP[16]= {0xff,0x02,0x00,0x00,
                           0x00,0x00,0x00,0x00,
                           0x00,0x00,0x00,0x02
                          };
-uint8_t data_buf[2048];
+uint8_t data_buff[2048];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_MDMA_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
@@ -108,6 +110,7 @@ uint8_t rxData;
 uint8_t rx_buffer[2048]= {0,};
 int rx_index = 0;
 uint8_t rx_flag =0;
+uint8_t qspi_flag_tx = 0, qspi_flag_rx = 0;
 
 int _write(int fd, char *str, int len)
 {
@@ -120,6 +123,7 @@ int _write(int fd, char *str, int len)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+#if 0
   if (is_testing == 1)
   {
     PRINT_DBG("testing...\r\n");
@@ -153,7 +157,18 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       rx_buffer[rx_index++] = rxData;
     }
   }
+
+
+#endif
   HAL_UART_Receive_IT(&huart2, &rxData, 1);
+}
+void HAL_OSPI_RxCpltCallback(OSPI_HandleTypeDef *hospi)
+{
+	qspi_flag_rx = 0;
+}
+void HAL_OSPI_TxCpltCallback(OSPI_HandleTypeDef *hospi)
+{
+	qspi_flag_tx = 0;
 }
 uint8_t qspi_read_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_t len)
 {
@@ -210,33 +225,11 @@ uint8_t qspi_read_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_t
 	com.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
 
 	com.NbData = len;
-    #if 0
-	if (HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
-		  != HAL_OK)
-	{
-		printf("[%s > %s : %d]Cmd Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
-		return 1;
-	}
-	if (HAL_OSPI_Receive(&hospi1, pbuf, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
-		!= HAL_OK)
-	{
-		printf("[%s > %s : %d]Recv Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
-		return 2;
-	}
-        #endif
-#if 0
-    while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 0)
-    {
-        hospi1.Instance->FCR = OSPI_status;
-    }
-#endif
-	//if ((ret = HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)) != HAL_OK)
-  if ((ret = HAL_OSPI_Command(&hospi1, &com, 100)) != HAL_OK)
+  if ((ret = HAL_OSPI_Command(&hospi1, &com, 10)) != HAL_OK)
   {
 		printf("[%s > %s : %d]Cmd Error ret:%02X st:%X\r\n",__FILE__, __FUNCTION__, __LINE__ , ret, (uint16_t)OSPI_status);
 		return 4;
 	}
-    //OSPI_status=HAL_OSPI_GetState(&hospi1);
 	qspi_flag_rx = 1;
 	if ((ret = HAL_OSPI_Receive_DMA(&hospi1, pbuf)) != HAL_OK)
 	{
@@ -249,31 +242,12 @@ uint8_t qspi_read_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_t
 		//count and return
 	}
 #endif
-	//qspi_flag_rx = 1;
 #if 0
     while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 4)
     {
-        //hospi1.Instance->FCR = OSPI_status;
-    	hospi1.State = 0;
+        hospi1.Instance->FCR = OSPI_status;
+    	//hospi1.State = 0;
     }
-#endif
-#if 0
-	while((OSPI_status=HAL_OSPI_GetState(&hospi1)) != HAL_OSPI_STATE_READY)
-	{
-		if((OSPI_status == HAL_OSPI_STATE_ABORT)||(OSPI_status == HAL_OSPI_STATE_ERROR))
-		{
-			while((OSPI_status = HAL_OSPI_Abort_IT(&hospi1)) != HAL_OK)
-			{
-				printf("HAL_OSPI_Abort_IT Error = 0x%02x\r\n", (uint16_t)OSPI_status);
-			}
-		}
-	}
-#endif
-#if 0
-	while(!((OSPI_status=hospi1.Instance->SR) & 0x13))
-	{
-		hospi1.Instance->FCR = OSPI_status;
-	}
 #endif
 	return 0;
 }
@@ -331,29 +305,8 @@ uint8_t qspi_write_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_
 	com.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
 
 	com.NbData = len;
-    #if 0
-	//printf("send data[%d]:%s\r\n >",len, data);
-	if (HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
-		!= HAL_OK)
-	{
-		printf("[%s > %s : %d]CMD Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
-		return 1;
-	}
-	if (HAL_OSPI_Transmit(&hospi1, pbuf, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)
-		!= HAL_OK)
-	{
-		printf("[%s > %s : %d]Send Error \r\n",__FILE__, __FUNCTION__, __LINE__ );
-		return 2;
-	}
-        #endif
-#if 0
-    while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 0)
-	{
-	    hospi1.Instance->FCR = OSPI_status;
-	}
-#endif
 	//if ((ret = HAL_OSPI_Command(&hospi1, &com, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)) != HAL_OK)
-  if ((ret = HAL_OSPI_Command(&hospi1, &com, 100)) != HAL_OK)
+  if ((ret = HAL_OSPI_Command(&hospi1, &com, 10)) != HAL_OK)
 	{
 		printf("[%s > %s : %d]CMD Error ret:%02X st:%X\r\n",__FILE__, __FUNCTION__, __LINE__, ret, (uint16_t)OSPI_status);
 		return 4;
@@ -370,39 +323,24 @@ uint8_t qspi_write_buf(uint8_t op_code, uint32_t AddrSel, uint8_t *pbuf, uint16_
 		//count and return
 	}
 #endif
-	//qspi_flag_tx = 1;
 #if 0
 	while((OSPI_status=HAL_OSPI_GetState(&hospi1)) > 4)
     {
-        //hospi1.Instance->FCR = OSPI_status;
+        hospi1.Instance->FCR = OSPI_status;
 		//hospi1.State = 0;
     }
 #endif
-#if 0
-	while((OSPI_status=HAL_OSPI_GetState(&hospi1)) != HAL_OSPI_STATE_READY)
-	{
-		if((OSPI_status == HAL_OSPI_STATE_ABORT)||(OSPI_status == HAL_OSPI_STATE_ERROR))
-		{
-			while((OSPI_status = HAL_OSPI_Abort_IT(&hospi1)) != HAL_OK)
-			{
-				printf("HAL_OSPI_Abort_IT Error = 0x%02x\r\n", (uint16_t)OSPI_status);
-			}
-		}
-	}
-#endif
-#if 0
-	while(!((OSPI_status=hospi1.Instance->SR) & 0x13))
-		{
-			hospi1.Instance->FCR = OSPI_status;
-		}
-#endif
 	return 0;
 }
-void W6100Initialze(void)
+void W6300Initialze(void)
 {
 	//W6100Reset();
 
-#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
+#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_QSPI_
+
+   reg_wizchip_qspi_cbfunc(qspi_read_buf, qspi_write_buf);
+
+#elif _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
 /* SPI method callback registration */
 	#if defined SPI_DMA
 	reg_wizchip_spi_cbfunc(W6100SpiReadByte, W6100SpiWriteByte, W6100SpiReadBurst, W6100SpiWriteBurst);
@@ -436,12 +374,12 @@ void W6100Initialze(void)
 
 	if (ctlwizchip(CW_INIT_WIZCHIP, (void *)W6100_AdrSet) == -1)
 	{
-		printf("W6100 initialized fail.\r\n");
+		printf("W6300 initialized fail.\r\n");
 	}
 
 	if (ctlwizchip(CW_SET_INTRMASK, &temp) == -1)
 	{
-		printf("W6100 interrupt\r\n");
+		printf("W6300 interrupt\r\n");
 	}
 	//printf("interrupt mask: %02x\r\n",getIMR());
 }
@@ -465,7 +403,11 @@ void FPGA_Reset(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  uint16_t i = 0;
+  uint8_t syslock = SYS_NET_LOCK;
+  uint8_t tmp = 0;
+  PLL2_ClocksTypeDef PLL2_Clk_data;
+  char mode_char[4][5]={"Sing","Dual","Quad"};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -489,10 +431,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_MDMA_Init();
   MX_OCTOSPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("W6100 loop back test \r\n");
+  printf("W6300 loop back test \r\n");
   printf("Compile %s - %s \r\n", __DATE__, __TIME__);
   HAL_UART_Receive_IT(&huart2, &rxData, 1);
   HAL_RCCEx_GetPLL2ClockFreq(&PLL2_Clk_data);
@@ -522,7 +465,7 @@ int main(void)
   HAL_Delay(500);
   HAL_Delay(500);
 #endif
-  W6100Initialze();
+  W6300Initialze();
   ctlwizchip(CW_SYS_UNLOCK, &syslock);
   ctlnetwork(CN_SET_NETINFO, &gWIZNETINFO);
   printf("VERSION(%04x) = %04x \r\n", _VER_, getVER());
@@ -537,6 +480,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	loopback_tcps(1, data_buff, 5000, AS_IPV4);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -614,7 +558,7 @@ void PeriphCommonClock_Config(void)
   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_OSPI|RCC_PERIPHCLK_USART2;
   PeriphClkInitStruct.PLL2.PLL2M = 5;
-  PeriphClkInitStruct.PLL2.PLL2N = 120;
+  PeriphClkInitStruct.PLL2.PLL2N = 60;
   PeriphClkInitStruct.PLL2.PLL2P = 2;
   PeriphClkInitStruct.PLL2.PLL2Q = 5;
   PeriphClkInitStruct.PLL2.PLL2R = 10;
@@ -729,6 +673,23 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * Enable MDMA controller clock
+  */
+static void MX_MDMA_Init(void)
+{
+
+  /* MDMA controller clock enable */
+  __HAL_RCC_MDMA_CLK_ENABLE();
+  /* Local variables */
+
+  /* MDMA interrupt initialization */
+  /* MDMA_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(MDMA_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(MDMA_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -803,6 +764,57 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void print_network_information(void)
+{
+	wiz_NetInfo gWIZNETINFO1;
+#if 0
+	wizchip_getnetinfo(&gWIZNETINFO);
+	printf("Mac address: %02x:%02x:%02x:%02x:%02x:%02x\r\n",gWIZNETINFO.mac[0],gWIZNETINFO.mac[1],gWIZNETINFO.mac[2],gWIZNETINFO.mac[3],gWIZNETINFO.mac[4],gWIZNETINFO.mac[5]);
+	printf("IP address : %d.%d.%d.%d\r\n",gWIZNETINFO.ip[0],gWIZNETINFO.ip[1],gWIZNETINFO.ip[2],gWIZNETINFO.ip[3]);
+	printf("SN Mask	   : %d.%d.%d.%d\r\n",gWIZNETINFO.sn[0],gWIZNETINFO.sn[1],gWIZNETINFO.sn[2],gWIZNETINFO.sn[3]);
+	printf("Gate way   : %d.%d.%d.%d\r\n",gWIZNETINFO.gw[0],gWIZNETINFO.gw[1],gWIZNETINFO.gw[2],gWIZNETINFO.gw[3]);
+	printf("DNS Server : %d.%d.%d.%d\r\n",gWIZNETINFO.dns[0],gWIZNETINFO.dns[1],gWIZNETINFO.dns[2],gWIZNETINFO.dns[3]);
+	printf("LLA  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO.lla[0],gWIZNETINFO.lla[1],gWIZNETINFO.lla[2],gWIZNETINFO.lla[3],\
+									gWIZNETINFO.lla[4],gWIZNETINFO.lla[5],gWIZNETINFO.lla[6],gWIZNETINFO.lla[7],\
+									gWIZNETINFO.lla[8],gWIZNETINFO.lla[9],gWIZNETINFO.lla[10],gWIZNETINFO.lla[11],\
+									gWIZNETINFO.lla[12],gWIZNETINFO.lla[13],gWIZNETINFO.lla[14],gWIZNETINFO.lla[15]);
+	printf("GUA  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO.gua[0],gWIZNETINFO.gua[1],gWIZNETINFO.gua[2],gWIZNETINFO.gua[3],\
+									gWIZNETINFO.gua[4],gWIZNETINFO.gua[5],gWIZNETINFO.gua[6],gWIZNETINFO.gua[7],\
+									gWIZNETINFO.gua[8],gWIZNETINFO.gua[9],gWIZNETINFO.gua[10],gWIZNETINFO.gua[11],\
+									gWIZNETINFO.gua[12],gWIZNETINFO.gua[13],gWIZNETINFO.gua[14],gWIZNETINFO.gua[15]);
+	printf("SN6  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO.sn6[0],gWIZNETINFO.sn6[1],gWIZNETINFO.sn6[2],gWIZNETINFO.sn6[3],\
+									gWIZNETINFO.sn6[4],gWIZNETINFO.sn6[5],gWIZNETINFO.sn6[6],gWIZNETINFO.sn6[7],\
+									gWIZNETINFO.sn6[8],gWIZNETINFO.sn6[9],gWIZNETINFO.sn6[10],gWIZNETINFO.sn6[11],\
+									gWIZNETINFO.sn6[12],gWIZNETINFO.sn6[13],gWIZNETINFO.sn6[14],gWIZNETINFO.sn6[15]);
+	printf("GW6  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO.gw6[0],gWIZNETINFO.gw6[1],gWIZNETINFO.gw6[2],gWIZNETINFO.gw6[3],\
+									gWIZNETINFO.gw6[4],gWIZNETINFO.gw6[5],gWIZNETINFO.gw6[6],gWIZNETINFO.gw6[7],\
+									gWIZNETINFO.gw6[8],gWIZNETINFO.gw6[9],gWIZNETINFO.gw6[10],gWIZNETINFO.gw6[11],\
+									gWIZNETINFO.gw6[12],gWIZNETINFO.gw6[13],gWIZNETINFO.gw6[14],gWIZNETINFO.gw6[15]);
+#else
+	wizchip_getnetinfo(&gWIZNETINFO1);
+		printf("Mac address: %02x:%02x:%02x:%02x:%02x:%02x\r\n",gWIZNETINFO1.mac[0],gWIZNETINFO1.mac[1],gWIZNETINFO1.mac[2],gWIZNETINFO1.mac[3],gWIZNETINFO1.mac[4],gWIZNETINFO1.mac[5]);
+		printf("IP address : %d.%d.%d.%d\r\n",gWIZNETINFO1.ip[0],gWIZNETINFO1.ip[1],gWIZNETINFO1.ip[2],gWIZNETINFO1.ip[3]);
+		printf("SN Mask	   : %d.%d.%d.%d\r\n",gWIZNETINFO1.sn[0],gWIZNETINFO1.sn[1],gWIZNETINFO1.sn[2],gWIZNETINFO1.sn[3]);
+		printf("Gate way   : %d.%d.%d.%d\r\n",gWIZNETINFO1.gw[0],gWIZNETINFO1.gw[1],gWIZNETINFO1.gw[2],gWIZNETINFO1.gw[3]);
+		//printf("DNS Server : %d.%d.%d.%d\r\n",gWIZNETINFO1.dns[0],gWIZNETINFO1.dns[1],gWIZNETINFO1.dns[2],gWIZNETINFO1.dns[3]);
+		printf("LLA  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO1.lla[0],gWIZNETINFO1.lla[1],gWIZNETINFO1.lla[2],gWIZNETINFO1.lla[3],\
+										gWIZNETINFO1.lla[4],gWIZNETINFO1.lla[5],gWIZNETINFO1.lla[6],gWIZNETINFO1.lla[7],\
+										gWIZNETINFO1.lla[8],gWIZNETINFO1.lla[9],gWIZNETINFO1.lla[10],gWIZNETINFO1.lla[11],\
+										gWIZNETINFO1.lla[12],gWIZNETINFO1.lla[13],gWIZNETINFO1.lla[14],gWIZNETINFO1.lla[15]);
+		printf("GUA  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO1.gua[0],gWIZNETINFO1.gua[1],gWIZNETINFO1.gua[2],gWIZNETINFO1.gua[3],\
+										gWIZNETINFO1.gua[4],gWIZNETINFO1.gua[5],gWIZNETINFO1.gua[6],gWIZNETINFO1.gua[7],\
+										gWIZNETINFO1.gua[8],gWIZNETINFO1.gua[9],gWIZNETINFO1.gua[10],gWIZNETINFO1.gua[11],\
+										gWIZNETINFO1.gua[12],gWIZNETINFO1.gua[13],gWIZNETINFO1.gua[14],gWIZNETINFO1.gua[15]);
+		printf("SN6  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO1.sn6[0],gWIZNETINFO1.sn6[1],gWIZNETINFO1.sn6[2],gWIZNETINFO1.sn6[3],\
+										gWIZNETINFO1.sn6[4],gWIZNETINFO1.sn6[5],gWIZNETINFO1.sn6[6],gWIZNETINFO1.sn6[7],\
+										gWIZNETINFO1.sn6[8],gWIZNETINFO1.sn6[9],gWIZNETINFO1.sn6[10],gWIZNETINFO1.sn6[11],\
+										gWIZNETINFO1.sn6[12],gWIZNETINFO1.sn6[13],gWIZNETINFO1.sn6[14],gWIZNETINFO1.sn6[15]);
+		printf("GW6  : %.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X:%.2X%.2X\r\n",gWIZNETINFO1.gw6[0],gWIZNETINFO1.gw6[1],gWIZNETINFO1.gw6[2],gWIZNETINFO1.gw6[3],\
+										gWIZNETINFO1.gw6[4],gWIZNETINFO1.gw6[5],gWIZNETINFO1.gw6[6],gWIZNETINFO1.gw6[7],\
+										gWIZNETINFO1.gw6[8],gWIZNETINFO1.gw6[9],gWIZNETINFO1.gw6[10],gWIZNETINFO1.gw6[11],\
+										gWIZNETINFO1.gw6[12],gWIZNETINFO1.gw6[13],gWIZNETINFO1.gw6[14],gWIZNETINFO1.gw6[15]);
+#endif
+}
 
 /* USER CODE END 4 */
 
